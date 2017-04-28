@@ -23,7 +23,7 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 	//#todo#fix token condition need to be fixed
 	switch model.Condition {
 	case "like":
-		conNVal = fmt.Sprintf("%s %%%s%%", model.Condition, model.Value[0])
+		conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
 	case "=":
 		conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
 	default :
