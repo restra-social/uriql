@@ -112,7 +112,7 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 				}
 				// dont print and for the last field
 				if i < len(model.Field)-1 {
-					str += "and "
+					str += "or "
 				}
 			}
 		}
