@@ -3,7 +3,7 @@ package uriql
 import (
 	"strings"
 	"udhvabon.com/neuron/uriql/models"
-	"udhvabon.com/neuron/uriql/dictionary"
+	"udhvabon.com/neuron/soma/uriql/dictionary"
 	"reflect"
 )
 
