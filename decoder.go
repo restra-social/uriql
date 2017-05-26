@@ -3,7 +3,7 @@ package uriql
 import (
 	"strings"
 	"udhvabon.com/neuron/uriql/models"
-	"udhvabon.com/neuron/soma/uriql/dictionary"
+	"udhvabon.com/neuron/uriql/dictionary"
 	"reflect"
 )
 
@@ -11,9 +11,9 @@ type QueryDecoder struct {
 	Def *dictionary.Def
 }
 
-func GetQueryDecoder() *QueryDecoder {
+func GetQueryDecoder(dict map[string]map[string]models.SearchParam) *QueryDecoder {
 	return &QueryDecoder{
-		Def: dictionary.GetDef(),
+		Def: dictionary.GetDef(dict),
 	}
 }
 

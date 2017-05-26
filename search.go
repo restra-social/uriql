@@ -1,13 +1,15 @@
 package uriql
 
+import "udhvabon.com/neuron/uriql/models"
+
 type Uriql struct {
 	Decoder *URIDecoder
 	Builder *N1QLQueryBuilder
 }
 
-func GetUriql() *Uriql {
+func GetUriql(dict map[string]map[string]models.SearchParam) *Uriql {
 	return &Uriql{
-		Decoder: GetURIDecoder(),
+		Decoder: GetURIDecoder(dict),
 		Builder: GetN1QLBuilder(),
 	}
 }

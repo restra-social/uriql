@@ -45,7 +45,7 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 		}
 
 	case "single":
-		str += fmt.Sprintf("META(r).id %s", conNVal)
+		str += fmt.Sprintf("META(r).id %s::%s", model.Resource, conNVal)
 	case "number":
 		// found just field so far
 		str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
