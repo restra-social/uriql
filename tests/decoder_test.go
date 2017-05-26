@@ -5,6 +5,7 @@ import (
 	"udhvabon.com/neuron/uriql/models"
 	search "udhvabon.com/neuron/uriql"
 	"reflect"
+	"udhvabon.com/neuron/soma/uriql/dictionary"
 )
 
 func checkVal(t *testing.T, expect *models.QueryParam, got *models.QueryParam) {
@@ -51,30 +52,113 @@ func checkVal(t *testing.T, expect *models.QueryParam, got *models.QueryParam) {
 
 func TestDecode(t *testing.T) {
 
-	dict := map[string]map[string]models.SearchParam{
-
-		"Patient": map[string]models.SearchParam{
-
-			"active": models.SearchParam{
-				Type:      "token",
-				FieldType: "boolean",
-				Path:      []string{"active"},
-			},
-			"name": models.SearchParam{
-				Type:      "string",
-				FieldType: "string",
-				Path:      []string{"[]name.[]family", "[]name.[]given"},
-			},
-		},
-	}
-
-	decode := search.GetQueryDecoder(dict)
+	decode := search.GetQueryDecoder(dictionary.FHIRDictionary())
 
 	t.Log("Testing Universal Parameter : ")
 
-
-	p := "Patient?name:contains=Mr."
+	p := "Patient?_id=1234567890"
 	qp := decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"id",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType:  "universal",
+		Value:     []string{"1234567890"},
+	}, &qp)
+
+	p = "Patient?_lastUpdated=gt2010-10-01"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Object: []string{"meta"},
+		Field: []models.FieldInfo{
+			{
+				"lastUpdated",
+				false,
+			},
+		},
+		Condition: ">",
+		FHIRType:  "universal",
+		Value:     []string{"2010-10-01"},
+	}, &qp)
+
+	t.Log("Testing NUMBER Parameter : ")
+
+	p = "Encounter?length=gt204"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"length",
+				false,
+			},
+		},
+		Condition: ">",
+		FHIRType:  "number",
+		Value:     []string{"204"},
+	}, &qp)
+
+	p = "Encounter?length=ge6000"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"length",
+				false,
+			},
+		},
+		Condition: ">=",
+		FHIRType: "number",
+		Value: []string{"6000"},
+	}, &qp)
+
+	p = "Encounter?length=le27.5"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"length",
+				false,
+			},
+		},
+		Condition: "=<",
+		FHIRType: "number",
+		Value: []string{"27.5"},
+	}, &qp)
+
+	p = "Encounter?length=1029"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"length",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "number",
+		Value: []string{"1029"},
+	}, &qp)
+
+	t.Log("\nTesting STRING Parameter : ")
+
+	p = "Patient?name:contains=Mr."
+	qp = decode.DecodeQueryString(p)
 	t.Logf("Decoding : %s", p)
 	t.Logf("Decoded to : %+v", qp)
 	checkVal(t, &models.QueryParam{
@@ -82,17 +166,86 @@ func TestDecode(t *testing.T) {
 		Field: []models.FieldInfo{
 			{
 				"family",
-				true,
+				false,
 			},
 			{
 				"given",
 				true,
+			},
+			{
+				"suffix",
+				true,
+			},
+			{
+				"text",
+				false,
 			},
 		},
 		Condition: "like",
 		FHIRType: "string",
 		Value: []string{"Mr."},
 	}, &qp)
+
+	p = "Patient?name=Fahim"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"name"},
+		Field: []models.FieldInfo{
+			{
+				"family",
+				false,
+			},
+			{
+				"given",
+				true,
+			},
+			{
+				"suffix",
+				true,
+			},
+			{
+				"text",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "string",
+		Value: []string{"Fahim"},
+	}, &qp)
+
+	p = "Patient?name:exact=Shariar"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"name"},
+		Field: []models.FieldInfo{
+			{
+				"family",
+				false,
+			},
+			{
+				"given",
+				true,
+			},
+			{
+				"suffix",
+				true,
+			},
+			{
+				"text",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "string",
+		Value: []string{"Shariar"},
+	}, &qp)
+
+
+	t.Log("\nTesting TOKEN Parameter : ")
 
 	p = "Patient?active=true"
 	qp = decode.DecodeQueryString(p)
@@ -110,6 +263,110 @@ func TestDecode(t *testing.T) {
 		Value: []string{"true"},
 	}, &qp)
 
+	p = "Patient?gender=male"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Field: []models.FieldInfo{
+			{
+				"gender",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "token",
+		Value: []string{"male"},
+	}, &qp)
+
+
+	p = "Patient?language=https://code.repo.org.bn|BN"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"communication"},
+		Field: []models.FieldInfo{
+			{
+				"language",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "token",
+		Value: []string{"https://code.repo.org.bn", "BN"},
+	}, &qp)
+
+	p = "Patient?identifier=|1234567"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"identifier"},
+		Field: []models.FieldInfo{
+			{
+				"value",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "token",
+		Value: []string{"", "1234567"},
+	}, &qp)
+
+
+	t.Log("\nTesting REFERENCE Parameter : ")
+
+	p = "Patient?general-practitioner=Practitioner/23"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"generalPractitioner"},
+		Field: []models.FieldInfo{
+			{
+				"reference",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "reference",
+		Value: []string{"23"},
+	}, &qp)
+
+	p = "Patient?general-practitioner:Practitioner=23"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Array: []string{"generalPractitioner"},
+		Field: []models.FieldInfo{
+			{
+				"reference",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "reference",
+		Value: []string{"23"},
+	}, &qp)
+
+	p = "Patient?organization=Organization/3456"
+	qp = decode.DecodeQueryString(p)
+	t.Logf("Decoding : %s", p)
+	t.Logf("Decoded to : %+v", qp)
+	checkVal(t, &models.QueryParam{
+		Object: []string{"managingOrganization"},
+		Field: []models.FieldInfo{
+			{
+				"reference",
+				false,
+			},
+		},
+		Condition: "=",
+		FHIRType: "reference",
+		Value: []string{"3456"},
+	}, &qp)
 
 
 

@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 	search "udhvabon.com/neuron/uriql"
+	"udhvabon.com/neuron/soma/uriql/dictionary"
 )
 
 func printResult(t *testing.T, p string , qp interface{}, q string) {
@@ -13,7 +14,7 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	decode := search.QueryDecoder{}
+	decode := search.GetQueryDecoder(dictionary.FHIRDictionary())
 
 	builder := search.GetN1QLBuilder()
 
