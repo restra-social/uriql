@@ -64,6 +64,7 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 		fv.Array = false
 		fv.Object = false
 		fv.Field = str
+		fieldInfo = append(fieldInfo, fv)
 	}
 
 	return fieldInfo

@@ -20,15 +20,21 @@ func TestN1QLBuild(t *testing.T) {
 
 	t.Log("Testing Universal Parameter : ")
 
-	p := "restaurant?city=dhaka"
+	p := "restaurant?title=dhaka"
 	qp := decode.DecodeQueryString(p)
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "restaurant?city2=dhaka"
+	p = "restaurant?city=dhaka"
 	qp = decode.DecodeQueryString(p)
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
+
+	/*
+	p = "restaurant?city2=dhaka"
+	qp = decode.DecodeQueryString(p)
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)*/
 	//
 	//p = "restaurant?city3=dhaka"
 	//qp = decode.DecodeQueryString(p)
