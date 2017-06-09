@@ -3,6 +3,7 @@ package uriql
 import (
 	"udhvabon.com/neuron/uriql/models"
 	"fmt"
+	"strings"
 )
 
 type N1QLQueryBuilder struct {
@@ -17,7 +18,7 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 	var str string
 	// todo#fix fix condtion parameter
 	// where ANY n IN %s satisfies (any name in n.`%s` SATISFIES name LIKE '%%%s%%' END) end;
-	str += fmt.Sprintf("select * from `neuron` as r where r.`resourceType` = '%s' and ", model.Resource)
+	str += fmt.Sprintf("select * from `kite` as r where r.`type` = '%s' and ", model.Resource)
 
 	var conNVal string
 	//#todo#fix token condition need to be fixed
@@ -26,23 +27,22 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 		conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
 	case "=":
 		conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
-	default :
+	default:
 		conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
 	}
 
 	switch model.FHIRType {
 
 	case "universal":
-		if len(model.Object) > 0 {
-			if model.Field[0].Array == false {
-				str += fmt.Sprintf("r.%s.%s %s", model.Object[0], model.Field[0].Field, conNVal)
-
+		str += "r."
+		for _, k := range model.Field {
+			if k.Array == false && k.Object == false {
+				str += fmt.Sprintf("%s.", k.Field)
 			} else {
 				// not yet for _profile , _security and _tag
 			}
-		} else {
-			str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
 		}
+		str += fmt.Sprintf(" %s %s", model.Condition, conNVal)
 
 	case "single":
 		str += fmt.Sprintf("META(r).id %s::%s", model.Resource, conNVal)
@@ -50,12 +50,15 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 		// found just field so far
 		str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
 	case "string":
+		// we now assume that all string type search field is within an array !!
 		str += buildArrayQuery(model, conNVal)
 	case "reference":
-		if len(model.Array) > 0 {
-			str += fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Array[0], conNVal)
-		}else if len(model.Object) > 0 {
-			str += fmt.Sprintf("any ref in r.`%s` satisfies (any org in SPLIT(ref.`reference`, '/') satisfies org %s end) end;", model.Object[0], conNVal)
+		for _, k := range model.Field {
+			if k.Array == true {
+				str += fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
+			} else if k.Object == true {
+				str += fmt.Sprintf("any ref in r.`%s` satisfies (any org in SPLIT(ref.`reference`, '/') satisfies org %s end) end;", model.Field, conNVal)
+			}
 		}
 	case "token":
 		switch model.FHIRFieldType {
@@ -65,7 +68,7 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 			str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
 		case "code":
 			str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
-		case "coding", "identifier" :
+		case "coding", "identifier":
 			str += buildArrayQuery(model, conNVal)
 		}
 	}
@@ -75,29 +78,68 @@ func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
 
 func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 
-	if len(model.Array) > 0 {
-		str += fmt.Sprintf("ANY n IN %s satisfies ", model.Array[0])
-	} else {
-		str += "where "
-	}
 	switch model.FHIRFieldType {
-	case "coding" :
+	case "coding":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
 		if len(model.Value) > 1 {
 			if model.Value[0] != "" {
 				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies d.`system` = '%s' and d.`code` = '%s' end)", model.Field[0].Field, model.Value[0], model.Value[1])
-			}else{
+			} else {
 				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies  d.`code` = '%s' end)", model.Field[0].Field, model.Value[1])
 			}
 		}
 		str += " end;"
+	case "string":
+		buildPath(&model)
+		oldPath := filterPath(&model)
+		model.Path = ""
+		// all of them are object like address.city.name
+		if model.ArrayCount == 0 {
+			str += fmt.Sprintf("%s %s", oldPath, conNVal)
+		} else {
+			// condition might be address.[]city.name
+			if model.ArrayCount == 1 {
+				for i:=0; i < model.ArrayCount; i++ {
+					// array does not exists so its a simple path like address.city.name
+					buildPath(&model)
+					str += fmt.Sprintf("any n in %s satisfies n.%s %s", oldPath, model.Path, conNVal)
+				}
+			}else{
+				// multiple array found
+				// condition might be address.[]city.name.[]room.whatever
+				str += fmt.Sprintf("any n in r.%s satisfies ", oldPath)
+				for i:=0; i < model.ArrayCount; i++ {
+					// array does not exists so its a simple path like address.city.name
+					buildPath(&model)
+					oldPath := filterPath(&model)
+					model.Path = ""
+					if i == 0 {
+						str += fmt.Sprintf("(any d%d in n.%s satisfies ", i, oldPath)
+					}else if i == model.ArrayCount-1 {
+						// add the condition and value to the last nested subquery
+						str += fmt.Sprintf("d%d.%s %s end)", i-1, oldPath, conNVal)
+						break; // its done break the loop
+					} else{
+						str += fmt.Sprintf("(any d%d in d%d.%s satisfies ", i, i-1, oldPath)
+					}
+				}
 
-	case "identifier" :
+				str += " end;"
+
+			}
+		}
+		// valid query of address.[]city.name.[]room.whatever will be
+		/*
+		select * from `default` as r where r.`type` = 'restaurant' and any n in r.`address`.`city` satisfies
+		 (any d0 in n.`name`.`room` satisfies d0.`whatever` = 'dhaka' end) end;
+		 */
+
+	case "identifier":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
 		if len(model.Value) > 1 {
 			if model.Value[0] != "" {
 				str += fmt.Sprintf("n.`system` = '%s' and n.`value` = '%s' end)", model.Value[0], model.Value[1])
-			}else{
+			} else {
 				str += fmt.Sprintf("v.`value` = '%s' end)", model.Value[1])
 			}
 		}
@@ -119,4 +161,23 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 		str += " end;"
 	}
 	return str
+}
+
+func buildPath(model *models.QueryParam) {
+	for i:=0; i < len(model.Field); i++{
+		model.Path += fmt.Sprintf("`%s`.", model.Field[i].Field)
+		if model.Field[i].Array == true {
+			model.Field = append(model.Field[:0], model.Field[1:]...)
+			break;
+		}else {
+			model.Field = append(model.Field[:0], model.Field[1:]...)
+			buildPath(model)
+		}
+		break;
+	}
+}
+
+func filterPath(model *models.QueryParam) string{
+	trim := strings.TrimSuffix(model.Path, ".")
+	return fmt.Sprintf("%s", trim)
 }

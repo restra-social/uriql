@@ -1,11 +1,11 @@
-package tests
+package neuron
 
 import (
 	"testing"
 	"udhvabon.com/neuron/uriql/models"
 	search "udhvabon.com/neuron/uriql"
-	"reflect"
 	"udhvabon.com/neuron/soma/uriql/dictionary"
+	"reflect"
 )
 
 func checkVal(t *testing.T, expect *models.QueryParam, got *models.QueryParam) {
@@ -49,6 +49,7 @@ func checkVal(t *testing.T, expect *models.QueryParam, got *models.QueryParam) {
 		}
 	}
 }
+
 
 func TestDecode(t *testing.T) {
 

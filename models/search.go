@@ -1,11 +1,5 @@
 package models
 
-type SearchField struct {
-	Object string
-	Array  string
-	Field  FieldInfo
-}
-
 type SearchParam struct {
 	Type      string
 	FieldType string
@@ -13,20 +7,22 @@ type SearchParam struct {
 }
 
 type FieldInfo struct {
-	Field string
-	Array bool
+	Order  int8
+	Field  string
+	Array  bool
+	Object bool
 }
 
 type QueryParam struct {
 	Resource      string
-	Object        []string
-	Array         []string
+	ArrayCount    int
 	Field         []FieldInfo
 	FHIRFieldType string
 	FHIRType      string
 	Condition     string
 	Value         []string
 	SearchResult  SearchResult
+	Path          string
 }
 type SearchResult struct {
 	Type       string
