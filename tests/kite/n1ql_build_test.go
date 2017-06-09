@@ -14,20 +14,20 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	decode := search.GetQueryDecoder(dictionary2.KiteDictionary())
+	decode := search.GetQueryDecoder(dictionary2.RestaurantDictionary())
 
 	builder := search.GetN1QLBuilder()
 
 	t.Log("Testing Universal Parameter : ")
 
-	p := "restaurant?title=dhaka"
+	//p := "restaurant-items?foods=burger"
+	//qp := decode.DecodeQueryString(p)
+	//q := builder.Build(qp)
+	//printResult(t, p, qp, q)
+
+	p := "restaurant?address=dhaka"
 	qp := decode.DecodeQueryString(p)
 	q := builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "restaurant?city=dhaka"
-	qp = decode.DecodeQueryString(p)
-	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	/*

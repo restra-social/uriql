@@ -52,7 +52,7 @@ import (
 
 func TestDecode2(t *testing.T) {
 
-	decode := search.GetQueryDecoder(dictionary.KiteDictionary())
+	decode := search.GetQueryDecoder(dictionary.RestaurantDictionary())
 
 	t.Log("Testing Kite Parameter : ")
 

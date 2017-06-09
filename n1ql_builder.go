@@ -95,7 +95,7 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 		model.Path = ""
 		// all of them are object like address.city.name
 		if model.ArrayCount == 0 {
-			str += fmt.Sprintf("%s %s", oldPath, conNVal)
+			str += fmt.Sprintf("r.%s %s", oldPath, conNVal)
 		} else {
 			// condition might be address.[]city.name
 			if model.ArrayCount == 1 {
@@ -123,10 +123,9 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 						str += fmt.Sprintf("(any d%d in d%d.%s satisfies ", i, i-1, oldPath)
 					}
 				}
-
-				str += " end;"
-
 			}
+
+			str += " end;"
 		}
 		// valid query of address.[]city.name.[]room.whatever will be
 		/*
