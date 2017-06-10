@@ -13,71 +13,77 @@ func GetN1QLBuilder() *N1QLQueryBuilder {
 	return &N1QLQueryBuilder{}
 }
 
-func (n *N1QLQueryBuilder) Build(model models.QueryParam) string {
+func (n *N1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 
 	var str string
-	// todo#fix fix condtion parameter
-	// where ANY n IN %s satisfies (any name in n.`%s` SATISFIES name LIKE '%%%s%%' END) end;
-	str += fmt.Sprintf("select * from `kite` as r where r.`type` = '%s' and ", model.Resource)
+	total := len(allparam)
+	for i, model := range allparam {
 
-	var conNVal string
-	//#todo#fix token condition need to be fixed
-	switch model.Condition {
-	case "like":
-		conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
-	case "=":
-		conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
-	default:
-		conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
-	}
-
-	switch model.FHIRType {
-
-	case "universal":
-		str += "r."
-		for _, k := range model.Field {
-			if k.Array == false && k.Object == false {
-				str += fmt.Sprintf("%s.", k.Field)
-			} else {
-				// not yet for _profile , _security and _tag
-			}
+		if i == 0 {
+			// todo#fix fix condtion parameter
+			// where ANY n IN %s satisfies (any name in n.`%s` SATISFIES name LIKE '%%%s%%' END) end;
+			str += fmt.Sprintf("select * from `kite` as r where r.`type` = '%s' and ", model.Resource)
 		}
-		str += fmt.Sprintf(" %s %s", model.Condition, conNVal)
 
-	case "single":
-		str += fmt.Sprintf("META(r).id %s::%s", model.Resource, conNVal)
-	case "number":
-		// found just field so far
-		str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
-	case "string":
-		// we now assume that all string type search field is within an array !!
-		str += buildArrayQuery(model, conNVal)
-	case "reference":
-		for _, k := range model.Field {
-			if k.Array == true {
-				str += fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
-			} else if k.Object == true {
-				str += fmt.Sprintf("any ref in r.`%s` satisfies (any org in SPLIT(ref.`reference`, '/') satisfies org %s end) end;", model.Field, conNVal)
-			}
+		var conNVal string
+		//#todo#fix token condition need to be fixed
+		switch model.Condition {
+		case "like":
+			conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
+		case "=":
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
+		default:
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
 		}
-	case "token":
-		switch model.FHIRFieldType {
+
+		switch model.FHIRType {
+
+		case "universal":
+			str += "r."
+			for _, k := range model.Field {
+				if k.Array == false && k.Object == false {
+					str += fmt.Sprintf("%s.", k.Field)
+				} else {
+					// not yet for _profile , _security and _tag
+				}
+			}
+			str += fmt.Sprintf(" %s %s", model.Condition, conNVal)
+
+		case "single":
+			str += fmt.Sprintf("META(r).id %s::%s", model.Resource, conNVal)
+		case "number":
+			// found just field so far
+			str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
 		case "string":
-			str += buildArrayQuery(model, conNVal)
-		case "boolean":
-			str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
-		case "code":
-			str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
-		case "coding", "identifier":
-			str += buildArrayQuery(model, conNVal)
+			// we now assume that all string type search field is within an array !!
+			str += buildArrayQuery(model, conNVal, i, total)
+		case "reference":
+			for _, k := range model.Field {
+				if k.Array == true {
+					str += fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
+				} else if k.Object == true {
+					str += fmt.Sprintf("any ref in r.`%s` satisfies (any org in SPLIT(ref.`reference`, '/') satisfies org %s end) end;", model.Field, conNVal)
+				}
+			}
+		case "token":
+			switch model.FHIRFieldType {
+			case "string":
+				str += buildArrayQuery(model, conNVal, i, total)
+			case "boolean":
+				str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
+			case "code":
+				str += fmt.Sprintf("r.`%s` %s", model.Field[0].Field, conNVal)
+			case "coding", "identifier":
+				str += buildArrayQuery(model, conNVal, i, total)
+			}
 		}
+
 	}
 
 	return str
 }
 
-func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
-
+func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (str string) {
 	switch model.FHIRFieldType {
 	case "coding":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
@@ -99,33 +105,37 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 		} else {
 			// condition might be address.[]city.name
 			if model.ArrayCount == 1 {
-				for i:=0; i < model.ArrayCount; i++ {
+				for i := 0; i < model.ArrayCount; i++ {
 					// array does not exists so its a simple path like address.city.name
 					buildPath(&model)
 					str += fmt.Sprintf("any n in %s satisfies n.%s %s", oldPath, model.Path, conNVal)
 				}
-			}else{
+			} else {
 				// multiple array found
 				// condition might be address.[]city.name.[]room.whatever
 				str += fmt.Sprintf("any n in r.%s satisfies ", oldPath)
-				for i:=0; i < model.ArrayCount; i++ {
+				for i := 0; i < model.ArrayCount; i++ {
 					// array does not exists so its a simple path like address.city.name
 					buildPath(&model)
 					oldPath := filterPath(&model)
 					model.Path = ""
 					if i == 0 {
 						str += fmt.Sprintf("(any d%d in n.%s satisfies ", i, oldPath)
-					}else if i == model.ArrayCount-1 {
+					} else if i == model.ArrayCount-1 {
 						// add the condition and value to the last nested subquery
 						str += fmt.Sprintf("d%d.%s %s end)", i-1, oldPath, conNVal)
 						break; // its done break the loop
-					} else{
+					} else {
 						str += fmt.Sprintf("(any d%d in d%d.%s satisfies ", i, i-1, oldPath)
 					}
 				}
 			}
 
 			str += " end;"
+		}
+
+		if loop >= 0 && loop < total-1 {
+			str += fmt.Sprintf(" or ")
 		}
 		// valid query of address.[]city.name.[]room.whatever will be
 		/*
@@ -163,12 +173,12 @@ func buildArrayQuery(model models.QueryParam, conNVal string) (str string) {
 }
 
 func buildPath(model *models.QueryParam) {
-	for i:=0; i < len(model.Field); i++{
+	for i := 0; i < len(model.Field); i++ {
 		model.Path += fmt.Sprintf("`%s`.", model.Field[i].Field)
 		if model.Field[i].Array == true {
 			model.Field = append(model.Field[:0], model.Field[1:]...)
 			break;
-		}else {
+		} else {
 			model.Field = append(model.Field[:0], model.Field[1:]...)
 			buildPath(model)
 		}
@@ -176,7 +186,7 @@ func buildPath(model *models.QueryParam) {
 	}
 }
 
-func filterPath(model *models.QueryParam) string{
+func filterPath(model *models.QueryParam) string {
 	trim := strings.TrimSuffix(model.Path, ".")
 	return fmt.Sprintf("%s", trim)
 }

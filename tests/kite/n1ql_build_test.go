@@ -3,7 +3,7 @@ package kite
 import (
 	"testing"
 	search "udhvabon.com/neuron/uriql"
-	dictionary2 "udhvabon.com/kiteengine/docMan/uriql/dictionary"
+	"udhvabon.com/neuron/uriql/dictionary"
 )
 
 func printResult(t *testing.T, p string , qp interface{}, q string) {
@@ -14,40 +14,35 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	decode := search.GetQueryDecoder(dictionary2.RestaurantDictionary())
-
+	decode := search.GetQueryDecoder(dictionary.RestaurantDictionary())
 	builder := search.GetN1QLBuilder()
 
-	t.Log("Testing Universal Parameter : ")
+	t.Log("Testing Restaurant Parameter : ")
 
-	//p := "restaurant-items?foods=burger"
-	//qp := decode.DecodeQueryString(p)
-	//q := builder.Build(qp)
-	//printResult(t, p, qp, q)
-
-	p := "restaurant?address=dhaka"
+	p := "restaurant?title=Vuter"
 	qp := decode.DecodeQueryString(p)
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	/*
-	p = "restaurant?city2=dhaka"
+	p = "restaurant?address=dhaka"
 	qp = decode.DecodeQueryString(p)
 	q = builder.Build(qp)
-	printResult(t, p, qp, q)*/
-	//
-	//p = "restaurant?city3=dhaka"
-	//qp = decode.DecodeQueryString(p)
-	//q = builder.Build(qp)
-	//printResult(t, p, qp, q)
-	//
-	//p = "restaurant?city4=dhaka"
-	//qp = decode.DecodeQueryString(p)
-	//q = builder.Build(qp)
-	//printResult(t, p, qp, q)
+	printResult(t, p, qp, q)
+
+	decode = search.GetQueryDecoder(dictionary.RestaurantItemsDictionary())
+	builder = search.GetN1QLBuilder()
+
+	t.Log("Testing Restaurant Items Parameter : ")
 
 
+	p = "restaurant-items?foods=burger"
+	qp = decode.DecodeQueryString(p)
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
 
-
+	p = "restaurant-items?foods-price=45"
+	qp = decode.DecodeQueryString(p)
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
 
 }

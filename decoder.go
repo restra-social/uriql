@@ -8,7 +8,6 @@ import (
 )
 
 type QueryDecoder struct {
-	queryStruct models.QueryParam
 	Def *dictionary.Def
 }
 
@@ -21,8 +20,11 @@ func GetQueryDecoder(dict map[string]map[string]models.SearchParam) *QueryDecode
 // Path could be []name.[]family , []address.state, active
 func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 	var fieldInfo []models.FieldInfo
+
+	var queryStruct models.QueryParam
+	
 	var fv models.FieldInfo
-	f.queryStruct.ArrayCount = 0 // initial array count
+	queryStruct.ArrayCount = 0 // initial array count
 	fv.Order = 0;
 	if strings.Contains(str, ".") {
 		fi := strings.Split(str, ".")
@@ -35,7 +37,7 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 				fv.Array = true
 				fv.Object = false
 				fv.Field = fi[i][2:len(fi[i])] 	// address
-				f.queryStruct.ArrayCount++
+				queryStruct.ArrayCount++
 			}else{
 				// lets say if managingOrganization.reference
 				fv.Field = fi[i]	// managingOrganization
@@ -51,7 +53,7 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 			fv.Array = true
 			fv.Object = false
 			fv.Field = fi[end-1][2:len(fi[end-1])]
-			f.queryStruct.ArrayCount++
+			queryStruct.ArrayCount++
 		}else {
 			fv.Array = false
 			fv.Object = false
@@ -71,17 +73,23 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 }
 
 // todo--add better exception handeling
-func (f *QueryDecoder) DecodeQueryString(query string) models.QueryParam {
+func (f *QueryDecoder) DecodeQueryString(query string) []models.QueryParam {
+	var decodedParam []models.QueryParam
+
+	var queryStruct models.QueryParam
 
 	uri := strings.Split(query, "?")         // Trim ? from the Query Parameter
 	if len(uri) == 1 {
 		// if the parameter is /Patient/1234789
-		f.queryStruct .SearchResult.Type = "resource"
+		queryStruct.SearchResult.Type = "resource"
 		v := strings.Split(uri[0], "/")
-		f.queryStruct.Condition = "="
-		f.queryStruct.FHIRType = "single"
-		f.queryStruct.Resource = v[0]
-		f.queryStruct.Value = []string{v[1]}
+		queryStruct.Condition = "="
+		queryStruct.FHIRType = "single"
+		queryStruct.Resource = v[0]
+		queryStruct.Value = []string{v[1]}
+
+		decodedParam = append(decodedParam, queryStruct)
+
 	}else {
 		valueGet := strings.Split(uri[1], "=") // Split where it gets = sign
 		queryBase := valueGet[0]
@@ -94,49 +102,49 @@ func (f *QueryDecoder) DecodeQueryString(query string) models.QueryParam {
 		// Universal Resource Search Parameter
 		switch queryBase {
 		case "_id":
-			f.queryStruct.SearchResult.Type = "bundle"
-			f.queryStruct.Field = []models.FieldInfo{
+			queryStruct.SearchResult.Type = "bundle"
+			queryStruct.Field = []models.FieldInfo{
 				{
 					Field: "id",
 					Array: false,
 				},
 			}
-			f.queryStruct.FHIRType = "universal"
-			f.queryStruct.Condition = "="
-			f.queryStruct.Value = []string{queryParam}
+			queryStruct.FHIRType = "universal"
+			queryStruct.Condition = "="
+			queryStruct.Value = []string{queryParam}
 
 		case "_lastUpdated":
-			f.queryStruct.SearchResult.Type = "bundle"
-			f.queryStruct.Field = []models.FieldInfo{
+			queryStruct.SearchResult.Type = "bundle"
+			queryStruct.Field = []models.FieldInfo{
 				{
 					Field: "lastUpdated",
 					Array: false,
 				},
 			}
-			f.queryStruct.FHIRType = "universal"
+			queryStruct.FHIRType = "universal"
 			con := queryParam[0:2]
 			if con == "gt" {
-				f.queryStruct.Condition = ">"
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+				queryStruct.Condition = ">"
+				queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 			} else if con == "lt" {
-				f.queryStruct.Condition = "<"
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+				queryStruct.Condition = "<"
+				queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 			} else if con == "ge" {
-				f.queryStruct.Condition = ">="
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+				queryStruct.Condition = ">="
+				queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 			} else if con == "le" {
-				f.queryStruct.Condition = "=<"
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+				queryStruct.Condition = "=<"
+				queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 			} else if con == "ne" {
-				f.queryStruct.Condition = "!="
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+				queryStruct.Condition = "!="
+				queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 			} else {
-				f.queryStruct.Condition = "="
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam)
+				queryStruct.Condition = "="
+				queryStruct.Value = append(queryStruct.Value, queryParam)
 			}
 
 		default:
-			f.queryStruct.SearchResult.Type = "bundle"
+			queryStruct.SearchResult.Type = "bundle"
 			if strings.Contains(queryBase, ":") {
 				// name:contains
 				condition = strings.Split(queryBase, ":") // name , containers
@@ -152,30 +160,22 @@ func (f *QueryDecoder) DecodeQueryString(query string) models.QueryParam {
 				panic("Definaiton of [" + uri[1] + "] not found in dictionary")
 			}
 
-			var path string
-
-			for _, path = range info.Path {
-
-				fv := f.getFieldInfoFromPath(path)
-				f.queryStruct.Field = append(f.queryStruct.Field, fv...)
-
-			}
 			// Conditions for String type Parameter that could contain :contains, :exact etc Ex - ?name:contains=Mr.
 			switch info.Type {
 
 			case "string":
 				// if conditon specified like : contains or exact
-				f.queryStruct.Value = append(f.queryStruct.Value, queryParam) // Mr.
-				f.queryStruct.FHIRType = info.Type
-				f.queryStruct.FHIRFieldType = info.FieldType
+				queryStruct.Value = append(queryStruct.Value, queryParam) // Mr.
+				queryStruct.FHIRType = info.Type
+				queryStruct.FHIRFieldType = info.FieldType
 				if len(condition) > 0 {
 					if modifier == "contains" {
-						f.queryStruct.Condition = "like"
+						queryStruct.Condition = "like"
 					} else if modifier == "exact" {
-						f.queryStruct.Condition = "=" // #todo-add search lower and upper both
+						queryStruct.Condition = "=" // #todo-add search lower and upper both
 					}
 				} else {
-					f.queryStruct.Condition = "="
+					queryStruct.Condition = "="
 				}
 
 				// Conditions for token parameter Ex : - language=https://some.com|FR
@@ -184,81 +184,92 @@ func (f *QueryDecoder) DecodeQueryString(query string) models.QueryParam {
 				// todo#fix handle different modifiers for token like :not , :text
 				// If the parameter contains only single paramter or boolean value Ex :- ?active=true
 				case "boolean":
-					f.queryStruct.Condition = "="
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam)
-					f.queryStruct.FHIRType = info.Type
-					f.queryStruct.FHIRFieldType = info.FieldType
+					queryStruct.Condition = "="
+					queryStruct.Value = append(queryStruct.Value, queryParam)
+					queryStruct.FHIRType = info.Type
+					queryStruct.FHIRFieldType = info.FieldType
 				case "string", "code":
-					f.queryStruct.Condition = "="                               // Assuming all string under token needs to be exact matched
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam) // Mr.
-					f.queryStruct.FHIRType = info.Type
-					f.queryStruct.FHIRFieldType = info.FieldType
+					queryStruct.Condition = "="                               // Assuming all string under token needs to be exact matched
+					queryStruct.Value = append(queryStruct.Value, queryParam) // Mr.
+					queryStruct.FHIRType = info.Type
+					queryStruct.FHIRFieldType = info.FieldType
 
 				case "coding", "identifier", "codeableConcept":
-					f.queryStruct.FHIRType = info.Type
-					f.queryStruct.FHIRFieldType = info.FieldType
-					f.queryStruct.Value = strings.Split(queryParam, "|")
+					queryStruct.FHIRType = info.Type
+					queryStruct.FHIRFieldType = info.FieldType
+					queryStruct.Value = strings.Split(queryParam, "|")
 
 					if len(condition) > 0 {
 						if modifier == "not" {
-							f.queryStruct.Condition = "!="
+							queryStruct.Condition = "!="
 						} else if modifier == "above" {
-							f.queryStruct.Condition = ">=" // #todo-add search lower and upper both
+							queryStruct.Condition = ">=" // #todo-add search lower and upper both
 						} else if modifier == "below" {
-							f.queryStruct.Condition = "=<"
+							queryStruct.Condition = "=<"
 						} else if modifier == "in" {
-							f.queryStruct.Condition = "in"
+							queryStruct.Condition = "in"
 						} else if modifier == "not-in" {
-							f.queryStruct.Condition = "not in"
+							queryStruct.Condition = "not in"
 						}
 					} else {
-						f.queryStruct.Condition = "="
+						queryStruct.Condition = "="
 					}
 
 				}
 
 				// If the parameter contains number value Ex : ?length=gt204
 			case "number":
-				f.queryStruct.FHIRType = info.Type
-				f.queryStruct.FHIRFieldType = info.FieldType
+				queryStruct.FHIRType = info.Type
+				queryStruct.FHIRFieldType = info.FieldType
 				con := queryParam[0:2]
 				if con == "gt" {
-					f.queryStruct.Condition = ">"
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+					queryStruct.Condition = ">"
+					queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 				} else if con == "lt" {
-					f.queryStruct.Condition = "<"
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+					queryStruct.Condition = "<"
+					queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 				} else if con == "ge" {
-					f.queryStruct.Condition = ">="
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+					queryStruct.Condition = ">="
+					queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 				} else if con == "le" {
-					f.queryStruct.Condition = "=<"
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+					queryStruct.Condition = "=<"
+					queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 				} else if con == "ne" {
-					f.queryStruct.Condition = "!="
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam[2:len(queryParam)])
+					queryStruct.Condition = "!="
+					queryStruct.Value = append(queryStruct.Value, queryParam[2:len(queryParam)])
 				} else {
-					f.queryStruct.Condition = "="
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam)
+					queryStruct.Condition = "="
+					queryStruct.Value = append(queryStruct.Value, queryParam)
 				}
 
 			case "reference":
-				f.queryStruct.FHIRType = info.Type
-				f.queryStruct.FHIRFieldType = info.FieldType
-				f.queryStruct.Condition = "="
+				queryStruct.FHIRType = info.Type
+				queryStruct.FHIRFieldType = info.FieldType
+				queryStruct.Condition = "="
 				if strings.Contains(queryParam, "/") {
 					val := strings.Split(queryParam, "/")
-					f.queryStruct.Value = []string{val[1]}
+					queryStruct.Value = []string{val[1]}
 				} else {
 					// if the format is Patient?general-practitioner:Practitioner=23
-					f.queryStruct.Value = append(f.queryStruct.Value, queryParam)
+					queryStruct.Value = append(queryStruct.Value, queryParam)
 				}
 			}
 		}
-		f.queryStruct.Resource = uri[0]
+		queryStruct.Resource = uri[0]
+
+		for _, path := range info.Path {
+
+			fv := f.getFieldInfoFromPath(path)
+			queryStruct.Field = []models.FieldInfo{} 		// reset fields
+			//queryStruct.Value = []string{}			// reset value
+			queryStruct.Field = append(queryStruct.Field, fv...)
+
+			decodedParam = append(decodedParam, queryStruct)
+		}
+
 	}
 
-	return f.queryStruct
+	return decodedParam
 }
 
 func in_slice(v interface{}, in interface{}) (ok bool) {
