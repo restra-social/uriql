@@ -108,7 +108,7 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 				for i := 0; i < model.ArrayCount; i++ {
 					// array does not exists so its a simple path like address.city.name
 					buildPath(&model)
-					str += fmt.Sprintf("any n in %s satisfies n.%s %s", oldPath, model.Path, conNVal)
+					str += fmt.Sprintf("any n in n.%s satisfies r.%s %s", oldPath, trimDot(model.Path), conNVal)
 				}
 			} else {
 				// multiple array found
@@ -189,4 +189,9 @@ func buildPath(model *models.QueryParam) {
 func filterPath(model *models.QueryParam) string {
 	trim := strings.TrimSuffix(model.Path, ".")
 	return fmt.Sprintf("%s", trim)
+}
+
+func trimDot(input string) string {
+	trim := strings.TrimSuffix(input, ".")
+	return trim
 }

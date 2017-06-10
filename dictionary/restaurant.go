@@ -21,7 +21,7 @@ func RestaurantDictionary() map[string]map[string]models.SearchParam {
 			"address": models.SearchParam{
 				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"address.city.name", "address.state.name", "postal"},
+				Path:      []string{"address.city.name", "address.state.name", "address.postal"},
 			},
 			"address-street": models.SearchParam{
 				Type:      "string",
@@ -47,6 +47,11 @@ func RestaurantDictionary() map[string]map[string]models.SearchParam {
 				Type: "string",
 				FieldType: "string",
 				Path: []string{"status"},
+			},
+			"test" : models.SearchParam{
+				Type: "string",
+				FieldType: "string",
+				Path: []string{"[]medium.[]cost.type"},
 			},
 		},
 	}

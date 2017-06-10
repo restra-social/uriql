@@ -18,14 +18,11 @@ func GetQueryDecoder(dict map[string]map[string]models.SearchParam) *QueryDecode
 }
 
 // Path could be []name.[]family , []address.state, active
-func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
-	var fieldInfo []models.FieldInfo
-
-	var queryStruct models.QueryParam
+func (f *QueryDecoder) getFieldInfoFromPath(str string) (fieldInfo []models.FieldInfo, count int) {
 	
 	var fv models.FieldInfo
-	queryStruct.ArrayCount = 0 // initial array count
-	fv.Order = 0;
+	count = 0 // initial array count
+
 	if strings.Contains(str, ".") {
 		fi := strings.Split(str, ".")
 		end := len(fi)
@@ -37,14 +34,14 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 				fv.Array = true
 				fv.Object = false
 				fv.Field = fi[i][2:len(fi[i])] 	// address
-				queryStruct.ArrayCount++
+				count++
 			}else{
 				// lets say if managingOrganization.reference
 				fv.Field = fi[i]	// managingOrganization
 				fv.Array = false
 				fv.Object = true
 			}
-			fv.Order++
+
 			fieldInfo = append(fieldInfo, fv)
 		}
 		// the last one is the field so
@@ -53,13 +50,13 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 			fv.Array = true
 			fv.Object = false
 			fv.Field = fi[end-1][2:len(fi[end-1])]
-			queryStruct.ArrayCount++
+			count++
 		}else {
 			fv.Array = false
 			fv.Object = false
 			fv.Field = fi[end-1]
 		}
-		fv.Order++
+
 		fieldInfo = append(fieldInfo, fv)
 	} else {
 		// if active, gender
@@ -69,7 +66,7 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) []models.FieldInfo {
 		fieldInfo = append(fieldInfo, fv)
 	}
 
-	return fieldInfo
+	return fieldInfo, count
 }
 
 // todo--add better exception handeling
@@ -259,9 +256,9 @@ func (f *QueryDecoder) DecodeQueryString(query string) []models.QueryParam {
 
 		for _, path := range info.Path {
 
-			fv := f.getFieldInfoFromPath(path)
+			fv, count := f.getFieldInfoFromPath(path)
+			queryStruct.ArrayCount = count
 			queryStruct.Field = []models.FieldInfo{} 		// reset fields
-			//queryStruct.Value = []string{}			// reset value
 			queryStruct.Field = append(queryStruct.Field, fv...)
 
 			decodedParam = append(decodedParam, queryStruct)

@@ -7,7 +7,6 @@ type SearchParam struct {
 }
 
 type FieldInfo struct {
-	Order  int8
 	Field  string
 	Array  bool
 	Object bool

@@ -29,6 +29,11 @@ func TestN1QLBuild(t *testing.T) {
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
+	p = "restaurant?test=ac"
+	qp = decode.DecodeQueryString(p)
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
+
 	decode = search.GetQueryDecoder(dictionary.RestaurantItemsDictionary())
 	builder = search.GetN1QLBuilder()
 
