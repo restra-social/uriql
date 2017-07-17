@@ -3,9 +3,6 @@ package kite
 import (
 	"testing"
 	//"udhvabon.com/neuron/uriql/models"
-	search "udhvabon.com/neuron/uriql"
-	//"reflect"
-	dictionary3 "udhvabon.com/neuron/uriql/dictionary"
 )
 //
 //func checkVal(t *testing.T, expect *models.QueryParam, got *models.QueryParam) {
@@ -52,15 +49,15 @@ import (
 
 func TestDecode2(t *testing.T) {
 
-	decode := search.GetQueryDecoder(dictionary3.RestaurantDictionary())
+	//decode := search.GetQueryDecoder(dictionary3.RestaurantDictionary())
 
-	t.Log("Testing Kite Parameter : ")
+	//t.Log("Testing Kite Parameter : ")
 
-	p := "restaurant?address=dhaka"
+	/*p := "restaurant?address=dhaka"
 	qp := decode.DecodeQueryString(p)
 	t.Logf("Decoding : %s", p)
 	t.Logf("Decoded to : %+v", qp)
-	//checkVal(t, &models.QueryParam{
+	//checkVal(t, &models.QueryParam{*/
 	//
 	//	Condition: "=",
 	//	FHIRType:  "universal",

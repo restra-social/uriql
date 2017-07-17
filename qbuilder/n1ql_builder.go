@@ -1,4 +1,4 @@
-package uriql
+package qbuilder
 
 import (
 	"udhvabon.com/neuron/uriql/models"
@@ -9,7 +9,7 @@ import (
 type N1QLQueryBuilder struct {
 }
 
-func GetN1QLBuilder() *N1QLQueryBuilder {
+func GetN1QLQueryBuilder() *N1QLQueryBuilder {
 	return &N1QLQueryBuilder{}
 }
 

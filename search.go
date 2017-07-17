@@ -1,20 +1,30 @@
 package uriql
 
-import "udhvabon.com/neuron/uriql/models"
+import (
+	"udhvabon.com/neuron/uriql/models"
+	builder "udhvabon.com/neuron/uriql/qbuilder"
+)
 
 type Uriql struct {
 	Decoder *URIDecoder
-	Builder *N1QLQueryBuilder
+	N1QLBuilder *builder.N1QLQueryBuilder
+	CypherBuilder *builder.CypherQueryBuilder
 }
 
 func GetUriql(dict map[string]map[string]models.SearchParam) *Uriql {
 	return &Uriql{
 		Decoder: GetURIDecoder(dict),
-		Builder: GetN1QLBuilder(),
+		N1QLBuilder: builder.GetN1QLQueryBuilder(),
+		CypherBuilder: builder.GetCypherBuilder(),
 	}
 }
 
-func (f *Uriql) UrlToN1Ql(query string) string {
-	decode := f.Decoder.Decode(query)
-	return f.Builder.Build(decode)
+func (f *Uriql) UrlToN1Ql(request models.RequestInfo) string {
+	decode := f.Decoder.Decode(request)
+	return f.N1QLBuilder.Build(decode)
+}
+
+func (f *Uriql) UrlToCypher(request models.RequestInfo) string {
+	decode := f.Decoder.Decode(request)
+	return f.CypherBuilder.Build(decode)
 }

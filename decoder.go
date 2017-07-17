@@ -70,12 +70,15 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) (fieldInfo []models.Fiel
 }
 
 // todo--add better exception handeling
-func (f *QueryDecoder) DecodeQueryString(query string) []models.QueryParam {
+func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.QueryParam {
 	var decodedParam []models.QueryParam
 
 	var queryStruct models.QueryParam
 
-	uri := strings.Split(query, "?")         // Trim ? from the Query Parameter
+	// Assign the Request Info to Query Struct
+	queryStruct.RequestInfo = request
+
+	uri := strings.Split(request.Query, "?")         // Trim ? from the Query Parameter
 	if len(uri) == 1 {
 		// if the parameter is /Patient/1234789
 		queryStruct.SearchResult.Type = "resource"
@@ -249,6 +252,23 @@ func (f *QueryDecoder) DecodeQueryString(query string) []models.QueryParam {
 				} else {
 					// if the format is Patient?general-practitioner:Practitioner=23
 					queryStruct.Value = append(queryStruct.Value, queryParam)
+				}
+
+
+				// Additional Cases for Graph Type [relation, node , both]
+
+			case "relation" , "node" :
+				queryStruct.Value = append(queryStruct.Value, queryParam) // Mr.
+				queryStruct.FHIRType = info.Type
+				queryStruct.FHIRFieldType = info.FieldType
+				if len(condition) > 0 {
+					if modifier == "contains" {
+						queryStruct.Condition = "like"
+					} else if modifier == "exact" {
+						queryStruct.Condition = "=" // #todo-add search lower and upper both
+					}
+				} else {
+					queryStruct.Condition = "="
 				}
 			}
 		}

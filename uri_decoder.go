@@ -12,7 +12,6 @@ func GetURIDecoder(dict map[string]map[string]models.SearchParam) *URIDecoder {
 	}
 }
 
-func (b *URIDecoder) Decode(query string) []models.QueryParam{
-
-	return b.Decoder.DecodeQueryString(query)
+func (b *URIDecoder) Decode(request models.RequestInfo) []models.QueryParam{
+	return b.Decoder.DecodeQueryString(request)
 }

@@ -1,5 +1,11 @@
 package models
 
+type RequestInfo struct {
+	UserId string
+	Type   string
+	Query  string
+}
+
 type SearchParam struct {
 	Type      string
 	FieldType string
@@ -13,6 +19,7 @@ type FieldInfo struct {
 }
 
 type QueryParam struct {
+	RequestInfo
 	Resource      string
 	ArrayCount    int
 	Field         []FieldInfo
@@ -23,6 +30,7 @@ type QueryParam struct {
 	SearchResult  SearchResult
 	Path          string
 }
+
 type SearchResult struct {
 	Type       string
 	Sorting    []Sort
