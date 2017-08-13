@@ -1,8 +1,8 @@
 package dictionary
 
-import "udhvabon.com/neuron/uriql/models"
+import "github.com/kite-social/uriql/models"
 
-func RestaurantDictionary() map[string]map[string]models.SearchParam {
+func N1QLDictionary() map[string]map[string]models.SearchParam {
 
 	dict := map[string]map[string]models.SearchParam{
 
@@ -47,11 +47,6 @@ func RestaurantDictionary() map[string]map[string]models.SearchParam {
 				Type: "string",
 				FieldType: "string",
 				Path: []string{"status"},
-			},
-			"test" : models.SearchParam{
-				Type: "string",
-				FieldType: "string",
-				Path: []string{"[]medium.[]cost.type"},
 			},
 		},
 	}

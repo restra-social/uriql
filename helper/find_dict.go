@@ -1,6 +1,6 @@
-package dictionary
+package helper
 
-import "udhvabon.com/neuron/uriql/models"
+import "github.com/kite-social/uriql/models"
 
 type Def struct {
 	Dictionary map[string]map[string]models.SearchParam

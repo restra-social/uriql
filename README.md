@@ -1,12 +1,32 @@
-### URI to N1QL Query Generator ( URIQL )
+### URI to Query Language Generator ( URIQL )
 
-This library helps to generate Couchbase N1QL Query from URL Query
+## Currently Supported Language are
+ * N1QL ( Couchbase SQL like Query Language )
+ * CYPHER ( Graph Database Neo4j )
+
+
+This library helps to generate Query Language from URL Query
 Parameter based on Defined logic of the paraeter
 
 ## Example
 URI : Patient?name:contains=Mr.
 
-Defined Logic will be where to search for name paremeter
+If the JSON data looks like this
+
+```
+  "name": [
+    {
+      "family": [
+        "Levin"
+      ],
+      "given": [
+        "Henry"
+      ]
+    }
+  ],
+```
+
+Dictionary will look like this. here `[]` means array and `.` means object. E.g : `[]array.obj` or `obj.obj` or `[]array.[]array`
 
 ```
 case "Patient" :
@@ -23,20 +43,6 @@ case "Patient" :
     }
 ```
 
-The JSON data looks like this
-
-```
-  "name": [
-    {
-      "family": [
-        "Levin"
-      ],
-      "given": [
-        "Henry"
-      ]
-    }
-  ],
-```
 
 The output will be like this
 
@@ -47,7 +53,7 @@ select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN nam
 ```
 
 
-### FHIR Search Implementation Status
+### Search Implementation Status
 
 | Search Parameter Types | Sub Types | Status | Comment |
 |:---:|:---:|:---:| :---: |
@@ -85,3 +91,5 @@ select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN nam
 | _contained | None | 0% |
 | _containedType | None | 0% |
 
+
+Note : The search pattern implemented in this library is inspired by FHIR Search

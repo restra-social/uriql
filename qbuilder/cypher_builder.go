@@ -1,7 +1,7 @@
 package qbuilder
 
 import (
-	"udhvabon.com/neuron/uriql/models"
+	"github.com/kite-social/uriql/models"
 	"fmt"
 	"strings"
 )

@@ -1,6 +1,6 @@
 package uriql
 
-import "udhvabon.com/neuron/uriql/models"
+import "github.com/kite-social/uriql/models"
 
 type URIDecoder struct {
 	Decoder *QueryDecoder

@@ -2,8 +2,10 @@ package neuron
 
 import (
 	"testing"
-	search "udhvabon.com/neuron/uriql"
+	search "github.com/kite-social/uriql/qbuilder"
+	decoder "github.com/kite-social/uriql"
 	"udhvabon.com/neuron/soma/uriql/dictionary"
+	"github.com/kite-social/uriql/models"
 )
 
 func printResult(t *testing.T, p string , qp interface{}, q string) {
@@ -14,48 +16,47 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	decode := search.GetQueryDecoder(dictionary.FHIRDictionary())
-
-	builder := search.GetN1QLBuilder()
-
+	decode := decoder.GetQueryDecoder(dictionary.FHIRDictionary())
+	builder := search.GetN1QLQueryBuilder()
 	t.Log("Testing Universal Parameter : ")
 
-	p := "Patient/1234567890"
-	qp := decode.DecodeQueryString(p)
+/*	p := "Patient/1234567890"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
 	q := builder.Build(qp)
-	printResult(t, p, qp, q)
+	printResult(t, p, qp, q)*/
 
-	p = "Patient?_id=1234567890"
-	qp = decode.DecodeQueryString(p)
-	q = builder.Build(qp)
+	p := "Patient?_id=1234567890"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
+	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
 
 	p = "Patient?_lastUpdated=le2010-10-01"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 
 	t.Log("Testing NUMBER Parameter : ")
 
+	// todo#fix if id provided then search the only resource relevent to id
 	p = "Encounter?length=gt204"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{Type: "Encounter", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	p = "Encounter?length=ge6000"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{Type: "Encounter", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	p = "Encounter?length=le27.5"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{Type: "Encounter", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	p = "Encounter?length=1029"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{Type: "Encounter", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
@@ -63,21 +64,22 @@ func TestN1QLBuild(t *testing.T) {
 	t.Log("\nTesting STRING Parameter : ")
 
 	p = "Patient?name:contains=Mr."
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	p = "Patient?name=Fahim"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
+
 
 	p = "Patient?name:exact=Shariar"
-	qp = decode.DecodeQueryString(p)
+	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
-
+	/*
 	t.Log("\nTesting TOKEN Parameter : ")
 
 	p = "Patient?active=true"
@@ -127,7 +129,7 @@ func TestN1QLBuild(t *testing.T) {
 	p = "Patient?organization=Organization/3456"
 	qp = decode.DecodeQueryString(p)
 	q = builder.Build(qp)
-	printResult(t, p, qp, q)
+	printResult(t, p, qp, q)*/
 
 
 

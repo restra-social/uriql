@@ -1,7 +1,7 @@
 package qbuilder
 
 import (
-	"udhvabon.com/neuron/uriql/models"
+	"github.com/kite-social/uriql/models"
 	"fmt"
 	"strings"
 )
@@ -47,10 +47,10 @@ func (n *N1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 					// not yet for _profile , _security and _tag
 				}
 			}
-			str += fmt.Sprintf(" %s %s", model.Condition, conNVal)
+			str += fmt.Sprintf(" %s", conNVal)
 
 		case "single":
-			str += fmt.Sprintf("META(r).id %s::%s", model.Resource, conNVal)
+			str = fmt.Sprintf("select * from `kite` as r where META(r).id = '%s::%s'", model.Resource, model.Value[0])
 		case "number":
 			// found just field so far
 			str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
@@ -108,12 +108,12 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 				for i := 0; i < model.ArrayCount; i++ {
 					// array does not exists so its a simple path like address.city.name
 					buildPath(&model)
-					str += fmt.Sprintf("any n in n.%s satisfies r.%s %s", oldPath, trimDot(model.Path), conNVal)
+					str += fmt.Sprintf("(any n in r.%s satisfies n.%s %s end)", oldPath, trimDot(model.Path), conNVal)
 				}
 			} else {
 				// multiple array found
 				// condition might be address.[]city.name.[]room.whatever
-				str += fmt.Sprintf("any n in r.%s satisfies ", oldPath)
+				str += fmt.Sprintf("(any n in r.%s satisfies ", oldPath)
 				for i := 0; i < model.ArrayCount; i++ {
 					// array does not exists so its a simple path like address.city.name
 					buildPath(&model)
@@ -126,12 +126,10 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 						str += fmt.Sprintf("d%d.%s %s end)", i-1, oldPath, conNVal)
 						break; // its done break the loop
 					} else {
-						str += fmt.Sprintf("(any d%d in d%d.%s satisfies ", i, i-1, oldPath)
+						str += fmt.Sprintf("(any d%d in d%d satisfies ", i, oldPath)
 					}
 				}
 			}
-
-			str += " end;"
 		}
 
 		if loop >= 0 && loop < total-1 {

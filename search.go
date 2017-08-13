@@ -1,8 +1,8 @@
 package uriql
 
 import (
-	"udhvabon.com/neuron/uriql/models"
-	builder "udhvabon.com/neuron/uriql/qbuilder"
+	"github.com/kite-social/uriql/models"
+	builder "github.com/kite-social/uriql/qbuilder"
 )
 
 type Uriql struct {
