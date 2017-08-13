@@ -1,20 +1,21 @@
 package qbuilder
 
 import (
-	"github.com/kite-social/uriql/models"
 	"fmt"
+	"github.com/kite-social/uriql/models"
 	"strings"
 )
 
-type N1QLQueryBuilder struct {
+type n1QLQueryBuilder struct {
 	bucketName string
 }
 
-func GetN1QLQueryBuilder(bucket string) *N1QLQueryBuilder {
-	return &N1QLQueryBuilder{ bucketName: bucket}
+// GetN1QLQueryBuilder : Get N1QL Builder Object
+func GetN1QLQueryBuilder(bucket string) *n1QLQueryBuilder {
+	return &n1QLQueryBuilder{bucketName: bucket}
 }
 
-func (n *N1QLQueryBuilder) Build(allparam []models.QueryParam) string {
+func (n *n1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 
 	var str string
 	total := len(allparam)
@@ -125,7 +126,7 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 					} else if i == model.ArrayCount-1 {
 						// add the condition and value to the last nested subquery
 						str += fmt.Sprintf("d%d.%s %s end)", i-1, oldPath, conNVal)
-						break; // its done break the loop
+						break // its done break the loop
 					} else {
 						str += fmt.Sprintf("(any d%d in d%d satisfies ", i, oldPath)
 					}
@@ -138,9 +139,9 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 		}
 		// valid query of address.[]city.name.[]room.whatever will be
 		/*
-		select * from `default` as r where r.`type` = 'restaurant' and any n in r.`address`.`city` satisfies
-		 (any d0 in n.`name`.`room` satisfies d0.`whatever` = 'dhaka' end) end;
-		 */
+			select * from `default` as r where r.`type` = 'restaurant' and any n in r.`address`.`city` satisfies
+			 (any d0 in n.`name`.`room` satisfies d0.`whatever` = 'dhaka' end) end;
+		*/
 
 	case "identifier":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
@@ -176,12 +177,12 @@ func buildPath(model *models.QueryParam) {
 		model.Path += fmt.Sprintf("`%s`.", model.Field[i].Field)
 		if model.Field[i].Array == true {
 			model.Field = append(model.Field[:0], model.Field[1:]...)
-			break;
+			break
 		} else {
 			model.Field = append(model.Field[:0], model.Field[1:]...)
 			buildPath(model)
 		}
-		break;
+		break
 	}
 }
 

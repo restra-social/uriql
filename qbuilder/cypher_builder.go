@@ -1,19 +1,20 @@
 package qbuilder
 
 import (
-	"github.com/kite-social/uriql/models"
 	"fmt"
+	"github.com/kite-social/uriql/models"
 	"strings"
 )
 
-type CypherQueryBuilder struct {
+type cypherQueryBuilder struct {
 }
 
-func GetCypherBuilder() *CypherQueryBuilder {
-	return &CypherQueryBuilder{}
+// GetCypherBuilder : Get Cypher Builder Object
+func GetCypherBuilder() *cypherQueryBuilder {
+	return &cypherQueryBuilder{}
 }
 
-func (n *CypherQueryBuilder) Build(allparam []models.QueryParam) string {
+func (n *cypherQueryBuilder) Build(allparam []models.QueryParam) string {
 
 	var str string
 	//total := len(allparam)
@@ -33,9 +34,9 @@ func (n *CypherQueryBuilder) Build(allparam []models.QueryParam) string {
 		fmt.Println(conNVal)
 
 		switch model.FHIRType {
-		case "relation" :
+		case "relation":
 
-			str += fmt.Sprintf("MATCH (u:%s{id:'%s'})-[r:%s]-(f)", model.RequestInfo.Type, model.RequestInfo.UserId, strings.ToUpper(model.Resource))
+			str += fmt.Sprintf("MATCH (u:%s{id:'%s'})-[r:%s]-(f)", model.RequestInfo.Type, model.RequestInfo.UserID, strings.ToUpper(model.Resource))
 
 			if len(model.Field) > 0 {
 				str += fmt.Sprintf(" WHERE ")
@@ -46,14 +47,12 @@ func (n *CypherQueryBuilder) Build(allparam []models.QueryParam) string {
 
 			str += fmt.Sprintf(" RETURN f")
 
-		case "node" :
+		case "node":
 
-			str += fmt.Sprintf("MATCH (u:%s{id:'%s'})-[:%s]-(f) RETURN f", model.RequestInfo.Type, model.RequestInfo.UserId, strings.ToUpper(model.Resource))
+			str += fmt.Sprintf("MATCH (u:%s{id:'%s'})-[:%s]-(f) RETURN f", model.RequestInfo.Type, model.RequestInfo.UserID, strings.ToUpper(model.Resource))
 		}
 
 	}
 
 	return str
 }
-
-

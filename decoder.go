@@ -1,16 +1,17 @@
 package uriql
 
 import (
-	"strings"
-	"github.com/kite-social/uriql/models"
 	"github.com/kite-social/uriql/helper"
-	"reflect"
+	"github.com/kite-social/uriql/models"
+	"strings"
 )
 
+// QueryDecoder : Get Query Decoder Object
 type QueryDecoder struct {
 	Def *helper.Def
 }
 
+// GetQueryDecoder : Get Query Decoder Object based on Dictionary
 func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	return &QueryDecoder{
 		Def: helper.GetDef(dict),
@@ -69,7 +70,11 @@ func (f *QueryDecoder) getFieldInfoFromPath(str string) (fieldInfo []models.Fiel
 	return fieldInfo, count
 }
 
-// todo--add better exception handeling
+/*
+DecodeQueryString : Decodes Request information into Query Parameter
+
+todo--add better exception handeling
+*/
 func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.QueryParam {
 	var decodedParam []models.QueryParam
 
@@ -136,14 +141,14 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 		// #todo#fix better exception handeling
 
 		if info.Type == "" && info.FieldType == "" {
-			panic("Definaiton of [" + uri[1] + "] not found in dictionary")
+			panic("Definition of [" + uri[1] + "] not found in dictionary")
 		}
 
 		// Conditions for String type Parameter that could contain :contains, :exact etc Ex - ?name:contains=Mr.
 		switch info.Type {
 
 		case "string":
-			// if conditon specified like : contains or exact
+			// if condition specified like : contains or exact
 			queryStruct.Value = append(queryStruct.Value, queryParam) // Mr.
 			queryStruct.FHIRType = info.Type
 			queryStruct.FHIRFieldType = info.FieldType
@@ -161,7 +166,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 		case "token":
 			switch info.FieldType {
 			// todo#fix handle different modifiers for token like :not , :text
-			// If the parameter contains only single paramter or boolean value Ex :- ?active=true
+			// If the parameter contains only single parameter or boolean value Ex :- ?active=true
 			case "boolean":
 				queryStruct.Condition = "="
 				queryStruct.Value = append(queryStruct.Value, queryParam)
@@ -268,17 +273,4 @@ func getConditionNVal(queryStruct *models.QueryParam, queryParam string) {
 		queryStruct.Condition = "="
 		queryStruct.Value = append(queryStruct.Value, queryParam)
 	}
-}
-
-func in_slice(v interface{}, in interface{}) (ok bool) {
-	val := reflect.Indirect(reflect.ValueOf(in))
-	switch val.Kind() {
-	case reflect.Slice, reflect.Array:
-		for i := 0; i < val.Len(); i++ {
-			if ok = v == val.Index(i).Interface(); ok {
-				return
-			}
-		}
-	}
-	return
 }

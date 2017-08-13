@@ -1,14 +1,14 @@
 package tests
 
 import (
-	"testing"
-	search "github.com/kite-social/uriql/qbuilder"
 	decoder "github.com/kite-social/uriql"
 	"github.com/kite-social/uriql/dictionary"
 	"github.com/kite-social/uriql/models"
+	search "github.com/kite-social/uriql/qbuilder"
+	"testing"
 )
 
-func printResult(t *testing.T, p string , qp interface{}, q string) {
+func printResult(t *testing.T, p string, qp interface{}, q string) {
 	t.Logf("Decoding : %s", p)
 	t.Logf("Decoded to : %+v", qp)
 	t.Logf("Query %s", q)
@@ -16,20 +16,20 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	dict := &models.Dictionary{ Model: dictionary.N1QLDictionary()}
+	dict := &models.Dictionary{Model: dictionary.N1QLDictionary()}
 
 	decode := decoder.GetQueryDecoder(dict)
 	builder := search.GetN1QLQueryBuilder("kite")
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "restaurant?title=mr. burger"
-	qp := decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "restaurant", Query: p})
+	p := "restaurant?title=mr.burger"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "restaurant", Query: p})
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	p = "restaurant?address=dhaka"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "restaurant", Query: p})
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "restaurant", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
