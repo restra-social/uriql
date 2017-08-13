@@ -6,7 +6,7 @@ type URIDecoder struct {
 	Decoder *QueryDecoder
 }
 
-func GetURIDecoder(dict map[string]map[string]models.SearchParam) *URIDecoder {
+func GetURIDecoder(dict *models.Dictionary) *URIDecoder {
 	return &URIDecoder{
 		Decoder: GetQueryDecoder(dict),
 	}

@@ -11,7 +11,9 @@ import (
 
 func TestCypherBuild(t *testing.T) {
 
-	decode := decoder.GetQueryDecoder(dictionary.CypherDictionary())
+	dict := &models.Dictionary{ Model: dictionary.CypherDictionary()}
+
+	decode := decoder.GetQueryDecoder(dict)
 	builder := search.GetCypherBuilder()
 
 	t.Log("Testing Friend Parameter : ")

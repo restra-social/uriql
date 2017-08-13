@@ -11,7 +11,7 @@ type QueryDecoder struct {
 	Def *helper.Def
 }
 
-func GetQueryDecoder(dict map[string]map[string]models.SearchParam) *QueryDecoder {
+func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	return &QueryDecoder{
 		Def: helper.GetDef(dict),
 	}

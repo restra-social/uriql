@@ -16,8 +16,10 @@ func printResult(t *testing.T, p string , qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	decode := decoder.GetQueryDecoder(dictionary.N1QLDictionary())
-	builder := search.GetN1QLQueryBuilder()
+	dict := &models.Dictionary{ Model: dictionary.N1QLDictionary()}
+
+	decode := decoder.GetQueryDecoder(dict)
+	builder := search.GetN1QLQueryBuilder("kite")
 
 	t.Log("Testing Restaurant Parameter : ")
 
@@ -27,11 +29,6 @@ func TestN1QLBuild(t *testing.T) {
 	printResult(t, p, qp, q)
 
 	p = "restaurant?address=dhaka"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "restaurant", Query: p})
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "restaurant?test=ac"
 	qp = decode.DecodeQueryString(models.RequestInfo{UserId: "1234567890", Type: "restaurant", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)

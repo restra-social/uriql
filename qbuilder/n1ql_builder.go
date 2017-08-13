@@ -7,10 +7,11 @@ import (
 )
 
 type N1QLQueryBuilder struct {
+	bucketName string
 }
 
-func GetN1QLQueryBuilder() *N1QLQueryBuilder {
-	return &N1QLQueryBuilder{}
+func GetN1QLQueryBuilder(bucket string) *N1QLQueryBuilder {
+	return &N1QLQueryBuilder{ bucketName: bucket}
 }
 
 func (n *N1QLQueryBuilder) Build(allparam []models.QueryParam) string {
@@ -22,7 +23,7 @@ func (n *N1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 		if i == 0 {
 			// todo#fix fix condtion parameter
 			// where ANY n IN %s satisfies (any name in n.`%s` SATISFIES name LIKE '%%%s%%' END) end;
-			str += fmt.Sprintf("select * from `kite` as r where r.`type` = '%s' and ", model.Resource)
+			str += fmt.Sprintf("select * from `%s` as r where r.`type` = '%s' and ", n.bucketName, model.Resource)
 		}
 
 		var conNVal string
