@@ -93,3 +93,7 @@ select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN nam
 
 
 Note : The search pattern implemented in this library is inspired by FHIR Search
+
+# Todo
+
+* Saperate Builder Module as plugin
