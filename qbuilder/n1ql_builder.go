@@ -31,11 +31,11 @@ func (n *n1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 		//#todo#fix token condition need to be fixed
 		switch model.Condition {
 		case "like":
-			conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value.Value)
 		case "=":
-			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value.Value)
 		default:
-			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value.Value)
 		}
 
 		switch model.FHIRType {
@@ -52,7 +52,7 @@ func (n *n1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 			str += fmt.Sprintf(" %s", conNVal)
 
 		case "single":
-			str = fmt.Sprintf("select * from `kite` as r where META(r).id = '%s::%s'", model.Resource, model.Value[0])
+			str = fmt.Sprintf("select * from `kite` as r where META(r).id = '%s::%s'", model.Resource, model.Value.Value)
 		case "number":
 			// found just field so far
 			str += fmt.Sprintf("r.%s %s", model.Field[0].Field, conNVal)
@@ -60,12 +60,18 @@ func (n *n1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 			// we now assume that all string type search field is within an array !!
 			str += buildArrayQuery(model, conNVal, i, total)
 		case "reference":
-			for _, k := range model.Field {
-				if k.Array == true {
-					str += fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
-				} else if k.Object == true {
-					str += fmt.Sprintf("any ref in r.`%s` satisfies (any org in SPLIT(ref.`reference`, '/') satisfies org %s end) end;", model.Field, conNVal)
+			if model.ArrayCount == 0 {
+				var fields string
+				len := len(model.Field)
+				// read : select * from `neuron` as r where r.`resourceType` = 'Observation' and any org in SPLIT(r.`subject`.`reference`, ':') satisfies org = 'fde147c9-964b-4004-b1eb-f707ac0f38ae' end;
+				for i, k := range model.Field {
+					// fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
+					 fields += fmt.Sprintf("`%s`", k.Field)
+					if i < len-1{
+						fields += "."
+					}
 				}
+				str += fmt.Sprintf("r.%s = '%s/%s';", fields, model.Value.Reference.Target, model.Value.Reference.Value)
 			}
 		case "token":
 			switch model.FHIRFieldType {
@@ -89,13 +95,13 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 	switch model.FHIRFieldType {
 	case "coding":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
-		if len(model.Value) > 1 {
-			if model.Value[0] != "" {
-				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies d.`system` = '%s' and d.`code` = '%s' end)", model.Field[0].Field, model.Value[0], model.Value[1])
+
+			if model.Value.Codable.System != "" {
+				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies d.`system` = '%s' and d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.System, model.Value.Codable.Code)
 			} else {
-				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies  d.`code` = '%s' end)", model.Field[0].Field, model.Value[1])
+				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies  d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.Code)
 			}
-		}
+
 		str += " end;"
 	case "string":
 		buildPath(&model)
@@ -145,13 +151,12 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 
 	case "identifier":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
-		if len(model.Value) > 1 {
-			if model.Value[0] != "" {
-				str += fmt.Sprintf("n.`system` = '%s' and n.`value` = '%s' end)", model.Value[0], model.Value[1])
+			if model.Value.Codable.System != "" {
+				str += fmt.Sprintf("n.`system` = '%s' and n.`value` = '%s' end)", model.Value.Codable.System, model.Value.Codable.Code)
 			} else {
-				str += fmt.Sprintf("v.`value` = '%s' end)", model.Value[1])
+				str += fmt.Sprintf("v.`value` = '%s' end)", model.Value.Codable.Code)
 			}
-		}
+
 		str += " end;"
 	default:
 		if len(model.Field) >= 1 {

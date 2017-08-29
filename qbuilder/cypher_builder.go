@@ -24,11 +24,11 @@ func (n *cypherQueryBuilder) Build(allparam []models.QueryParam) string {
 		//#todo#fix token condition need to be fixed
 		switch model.Condition {
 		case "like":
-			conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%%%s%%'", model.Condition, model.Value.Value)
 		case "=":
-			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value.Value)
 		default:
-			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value[0])
+			conNVal = fmt.Sprintf("%s '%s'", model.Condition, model.Value.Value)
 		}
 
 		fmt.Println(conNVal)

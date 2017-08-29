@@ -50,6 +50,26 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 				Path:      []string{"status"},
 			},
 		},
+
+		"Patient": map[string]models.SearchParam{
+
+			"language": models.SearchParam{
+				Type:      "token",
+				FieldType: "coding",
+				Path:      []string{"[]communication.language"},
+			},
+		},
+
+		"Observation": map[string]models.SearchParam{
+
+			"subject": models.SearchParam{
+				Type:      "reference",
+				FieldType: "string",
+				Path:      []string{"subject.reference"},
+			},
+		},
+
+
 	}
 
 	return dict

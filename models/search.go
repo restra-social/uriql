@@ -7,13 +7,6 @@ type RequestInfo struct {
 	Query  string // The query String E.g. people?name:contains=Jon
 }
 
-// SearchParam : Search Parameter Information
-type SearchParam struct {
-	Type      string   //
-	FieldType string   //
-	Path      []string //
-}
-
 // FieldInfo : Json field information matched with query parameter to search
 type FieldInfo struct {
 	Field  string // Object field information, bought from dictionary based on query parameter
@@ -30,9 +23,23 @@ type QueryParam struct {
 	FHIRFieldType string
 	FHIRType      string
 	Condition     string
-	Value         []string
+	Value         ValueType
 	SearchResult  SearchResult
 	Path          string
+}
+
+// ValueType : Contains the value parameter from the query
+type ValueType struct {
+	Reference struct {
+		Target string
+		Value  string
+	}
+	Codable struct {
+		System string
+		Code   string
+	}
+	Value     string
+	Modifiers string
 }
 
 // SearchResult : Parameter to store search filter information
