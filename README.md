@@ -6,7 +6,22 @@
 
 
 This library helps to generate Query Language from URL Query
-Parameter based on Defined logic of the paraeter
+Parameter based on Defined logic of the parameter
+
+## Index Generation from Dictionary
+
+```
+[]communication.language.[]coding.code
+```
+
+The above path will be decoded to
+
+```
+CREATE INDEX `patient_communication_language_coding_code` ON
+default( DISTINCT ARRAY
+         ( DISTINCE ARRAY c.code FOR c IN v.language.coding END, coding)
+        FOR `v` IN communication END, communication) WHERE resourceType = `Patient`
+```
 
 ## Example
 URI : Patient?name:contains=Mr.

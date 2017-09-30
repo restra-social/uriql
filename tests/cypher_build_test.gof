@@ -2,9 +2,9 @@ package tests
 
 import (
 	decoder "github.com/kite-social/uriql"
+	search "github.com/kite-social/uriql/builder"
 	"github.com/kite-social/uriql/dictionary"
 	"github.com/kite-social/uriql/models"
-	search "github.com/kite-social/uriql/qbuilder"
 	"testing"
 )
 

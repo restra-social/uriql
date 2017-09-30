@@ -1,6 +1,7 @@
 package uriql
 
 import (
+	"github.com/kite-social/uriql/builder"
 	"github.com/kite-social/uriql/helper"
 	"github.com/kite-social/uriql/models"
 	"strings"
@@ -18,61 +19,8 @@ func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	}
 }
 
-// Path could be []name.[]family , []address.state, active
-func (f *QueryDecoder) getFieldInfoFromPath(str string) (fieldInfo []models.FieldInfo, count int) {
-
-	var fv models.FieldInfo
-	//count = 0 // initial array count
-
-	if strings.Contains(str, ".") {
-		fi := strings.Split(str, ".")
-		end := len(fi)
-
-		// loop through the end of the path except for the last
-		for i := 0; i < end-1; i++ {
-			if strings.HasPrefix(fi[i], "[]") {
-				// lets say if []address.city
-				fv.Array = true
-				fv.Object = false
-				fv.Field = fi[i][2:len(fi[i])] // address
-				count++
-			} else {
-				// lets say if managingOrganization.reference
-				fv.Field = fi[i] // managingOrganization
-				fv.Array = false
-				fv.Object = true
-			}
-
-			fieldInfo = append(fieldInfo, fv)
-		}
-		// the last one is the field so
-		// if []name.[]family
-		if strings.HasPrefix(fi[end-1], "[]") {
-			fv.Array = true
-			fv.Object = false
-			fv.Field = fi[end-1][2:len(fi[end-1])]
-			count++
-		} else {
-			fv.Array = false
-			fv.Object = false
-			fv.Field = fi[end-1]
-		}
-
-		fieldInfo = append(fieldInfo, fv)
-	} else {
-		// if active, gender
-		fv.Array = false
-		fv.Object = false
-		fv.Field = str
-		fieldInfo = append(fieldInfo, fv)
-	}
-
-	return fieldInfo, count
-}
-
 /*
 DecodeQueryString : Decodes Request information into Query Parameter
-
 todo--add better exception handeling
 */
 func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.QueryParam {
@@ -96,12 +44,13 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 	switch queryBase {
 	case "_id":
 		queryStruct.SearchResult.Type = "bundle"
-		queryStruct.Field = []models.FieldInfo{
-			{
-				Field: "id",
-				Array: false,
-			},
-		}
+
+		fieldStack := helper.NewStack()
+		fieldStack.Push(&helper.Node{models.FieldInfo{
+			Field: "_id",
+			Array: false,
+		}})
+
 		queryStruct.FHIRType = "universal"
 		queryStruct.Condition = "="
 		queryStruct.Value.Value = queryParam
@@ -112,12 +61,13 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 
 	case "_lastUpdated":
 		queryStruct.SearchResult.Type = "bundle"
-		queryStruct.Field = []models.FieldInfo{
-			{
-				Field: "lastUpdated",
-				Array: false,
-			},
-		}
+
+		fieldStack := helper.NewStack()
+		fieldStack.Push(&helper.Node{models.FieldInfo{
+			Field: "lastUpdated",
+			Array: false,
+		}})
+
 		queryStruct.FHIRType = "universal"
 		getConditionNVal(&queryStruct, queryParam)
 
@@ -175,10 +125,10 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 				queryStruct.Condition = "="          // Assuming all string under token needs to be exact matched
 				queryStruct.Value.Value = queryParam // Mr.
 			case "coding":
-				queryStruct.Condition = "="          // Assuming all string under token needs to be exact matched
+				queryStruct.Condition = "=" // Assuming all string under token needs to be exact matched
 				code := strings.Split(queryParam, "|")
 				queryStruct.Value.Codable.System = code[0] // https://some.com
-				queryStruct.Value.Codable.Code = code[1] // FR
+				queryStruct.Value.Codable.Code = code[1]   // FR
 
 			case "code", "identifier", "codeableConcept":
 
@@ -222,7 +172,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 			// Additional Cases for Graph Type [relation, node , both]
 
 		case "relation", "node":
-			queryStruct.Value.Value = queryParam  // Mr.
+			queryStruct.Value.Value = queryParam // Mr.
 			if len(condition) > 0 {
 				switch queryStruct.Value.Modifiers {
 
@@ -240,10 +190,12 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 
 	for _, path := range info.Path {
 
-		fv, count := f.getFieldInfoFromPath(path)
-		queryStruct.ArrayCount = count
-		queryStruct.Field = []models.FieldInfo{} // reset fields
-		queryStruct.Field = append(queryStruct.Field, fv...)
+		fv := helper.GetFieldInfoFromPath(path)
+
+		fieldStack := helper.NewStack()
+		fieldStack.Push(&helper.Node{models.FieldInfo{}})
+
+		queryStruct.Fields = fv
 
 		decodedParam = append(decodedParam, queryStruct)
 	}
@@ -272,4 +224,25 @@ func getConditionNVal(queryStruct *models.QueryParam, queryParam string) {
 		queryStruct.Condition = "="
 		queryStruct.Value.Value = queryParam
 	}
+}
+
+type QueryIndex struct {
+	Resource string
+	Indexes  []string
+}
+
+/*
+DecodeQueryIndex : Builds Query Index Query out of Dictionary
+todo--add better exception handeling
+*/
+func (f *QueryDecoder) DecodeQueryIndex() []QueryIndex {
+
+	var index []QueryIndex
+	for resource, dict := range f.Def.Dictionary.Model {
+		var idx QueryIndex
+		idx.Resource = resource
+		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
+		index = append(index, idx)
+	}
+	return index
 }

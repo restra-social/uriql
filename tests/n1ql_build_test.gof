@@ -2,9 +2,9 @@ package tests
 
 import (
 	decoder "github.com/kite-social/uriql"
+	search "github.com/kite-social/uriql/builder"
 	"github.com/kite-social/uriql/dictionary"
 	"github.com/kite-social/uriql/models"
-	search "github.com/kite-social/uriql/qbuilder"
 	"testing"
 )
 
@@ -16,10 +16,10 @@ func printResult(t *testing.T, p string, qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	dict := &models.Dictionary{Model: dictionary.N1QLDictionary()}
+	dict := &models.Dictionary{Model: dictionary.N1QLDictionary(), Bucket: "kite"}
 
 	decode := decoder.GetQueryDecoder(dict)
-	builder := search.GetN1QLQueryBuilder("kite")
+	builder := search.GetN1QLQueryBuilder(dict.Bucket)
 
 	t.Log("Testing Restaurant Parameter : ")
 
@@ -38,13 +38,12 @@ func TestN1QLBuild(t *testing.T) {
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "Patient?language=|FR"
+	p = "Patient?language=https://code.system.org/lang|FR"
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
 	///Observation?subject=Patient/23
-
 
 	/*decode = search.GetQueryDecoder(dictionary.RestaurantItemsDictionary())
 	builder = builder.GetN1QLQueryBuilder()

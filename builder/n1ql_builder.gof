@@ -1,4 +1,4 @@
-package qbuilder
+package builder
 
 import (
 	"fmt"
@@ -66,8 +66,8 @@ func (n *n1QLQueryBuilder) Build(allparam []models.QueryParam) string {
 				// read : select * from `neuron` as r where r.`resourceType` = 'Observation' and any org in SPLIT(r.`subject`.`reference`, ':') satisfies org = 'fde147c9-964b-4004-b1eb-f707ac0f38ae' end;
 				for i, k := range model.Field {
 					// fmt.Sprintf("any ref in SPLIT(r.`%s`.`reference`,'/') satisfies ref %s end;", model.Field, conNVal)
-					 fields += fmt.Sprintf("`%s`", k.Field)
-					if i < len-1{
+					fields += fmt.Sprintf("`%s`", k.Field)
+					if i < len-1 {
 						fields += "."
 					}
 				}
@@ -96,11 +96,11 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 	case "coding":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
 
-			if model.Value.Codable.System != "" {
-				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies d.`system` = '%s' and d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.System, model.Value.Codable.Code)
-			} else {
-				str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies  d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.Code)
-			}
+		if model.Value.Codable.System != "" {
+			str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies d.`system` = '%s' and d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.System, model.Value.Codable.Code)
+		} else {
+			str += fmt.Sprintf("(any d in n.`%s`.`coding` satisfies  d.`code` = '%s' end)", model.Field[0].Field, model.Value.Codable.Code)
+		}
 
 		str += " end;"
 	case "string":
@@ -151,11 +151,11 @@ func buildArrayQuery(model models.QueryParam, conNVal string, loop, total int) (
 
 	case "identifier":
 		// select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN communication satisfies (any d in n.`language`.`coding` satisfies d.`display` = 'Dutch' and d.`system` = 'urn:ietf:bcp:47' end) end;
-			if model.Value.Codable.System != "" {
-				str += fmt.Sprintf("n.`system` = '%s' and n.`value` = '%s' end)", model.Value.Codable.System, model.Value.Codable.Code)
-			} else {
-				str += fmt.Sprintf("v.`value` = '%s' end)", model.Value.Codable.Code)
-			}
+		if model.Value.Codable.System != "" {
+			str += fmt.Sprintf("n.`system` = '%s' and n.`value` = '%s' end)", model.Value.Codable.System, model.Value.Codable.Code)
+		} else {
+			str += fmt.Sprintf("v.`value` = '%s' end)", model.Value.Codable.Code)
+		}
 
 		str += " end;"
 	default:

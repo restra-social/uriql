@@ -13,3 +13,11 @@ type Dictionary struct {
 	Model  map[string]map[string]SearchParam
 	Bucket string
 }
+
+// DictionaryInfo : Contains elaborated information about the fields exists in the dictionary
+type DictionaryInfo struct {
+	FHIRFieldType string
+	FHIRType      string
+	ArrayCount    int
+	Fields        interface{}
+}
