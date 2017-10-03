@@ -17,7 +17,7 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 			"identifier": models.SearchParam{
 				Type:      "token",
 				FieldType: "identifier",
-				Path:      []string{"[]identifier.value", "[]identifier.system"},
+				Path:      []string{"[]identifier.value", "identifier.[]system", "identifier.[]system.code"},
 			},
 			"name": models.SearchParam{
 				Type:      "string",
@@ -32,17 +32,17 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 			"organization": models.SearchParam{
 				Type:      "reference",
 				FieldType: "string",
-				Path:      []string{"managingOrganization.reference"},
+				Path:      []string{"managingOrganization.[]reference"},
 			},
 		},
 
-		"Encounter": map[string]models.SearchParam{
-			"length": models.SearchParam{
-				Type:      "number",
-				FieldType: "number",
-				Path:      []string{"length"},
-			},
-		},
+		/*		"Encounter": map[string]models.SearchParam{
+				"length": models.SearchParam{
+					Type:      "number",
+					FieldType: "number",
+					Path:      []string{"length"},
+				},
+			},*/
 	}
 
 	return dict

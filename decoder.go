@@ -241,7 +241,8 @@ func (f *QueryDecoder) DecodeQueryIndex() []QueryIndex {
 	for resource, dict := range f.Def.Dictionary.Model {
 		var idx QueryIndex
 		idx.Resource = resource
-		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
+		var indexBuilder builder.QueryBuilder
+		idx.Indexes = indexBuilder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
 		index = append(index, idx)
 	}
 	return index

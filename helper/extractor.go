@@ -1,29 +1,34 @@
 package helper
 
 import (
+	"fmt"
 	"github.com/kite-social/uriql/models"
 	"regexp"
 	"strings"
 )
 
 type StackInfo struct {
-	Fields     *Stack
+	//Fields *Queue
 	Length     int
-	ArrayCount int
+	ArrayPath  []string
+	ObjectPath string
 	Name       string
 }
 
 // Path could be []name.[]family , []address.state, active , managingOrganization.reference
 func GetFieldInfoFromPath(str string) (s StackInfo) {
-	s.ArrayCount = 0
+	var arr string
 	s.Length = 0
-	s.Fields = NewStack()
+	var objPath []string
+	//s.Fields = NewQueue(6) // #todo dynamic queue length !! very bad practice
 
 	var fv models.FieldInfo
 	//count = 0 // initial array count
 
 	if strings.Contains(str, ".") {
 		fields := strings.Split(str, ".")
+
+		var tempObj []string
 
 		// loop through the end of the path except for the last
 		for _, field := range fields {
@@ -33,14 +38,27 @@ func GetFieldInfoFromPath(str string) (s StackInfo) {
 				fv.Array = true
 				fv.Object = false
 				fv.Field = field[2:len(field)] // address
-				s.ArrayCount++
+
+				if len(tempObj) > 0 {
+					arr = fmt.Sprintf("%s.%s", strings.Join(tempObj, "."), fv.Field)
+				} else {
+					arr = fmt.Sprintf("%s", fv.Field)
+				}
+				s.ArrayPath = append(s.ArrayPath, arr)
+				// empty the temp object
+				tempObj = []string{}
+				objPath = []string{}
 			} else {
 				// lets say if managingOrganization.reference
 				fv.Field = field // managingOrganization
 				fv.Array = false
 				fv.Object = true
+				objPath = append(objPath, fv.Field)
+
+				tempObj = append(tempObj, fv.Field)
+
 			}
-			s.Fields.Push(&Node{fv})
+			//s.Fields.Push(&Node{fv})
 			s.Length++
 		}
 	} else {
@@ -49,7 +67,8 @@ func GetFieldInfoFromPath(str string) (s StackInfo) {
 		fv.Object = false
 		fv.Field = str
 
-		s.Fields.Push(&Node{fv})
+		//s.Fields.Push(&Node{fv})
+		objPath = append(objPath, fv.Field)
 		s.Length++
 	}
 
@@ -57,5 +76,7 @@ func GetFieldInfoFromPath(str string) (s StackInfo) {
 	indexName := r.FindAllString(str, -1)
 
 	s.Name = strings.Join(indexName, "_")
+	s.ObjectPath = strings.Join(objPath, ".")
+
 	return s
 }

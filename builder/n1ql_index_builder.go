@@ -7,57 +7,73 @@ import (
 	"strings"
 )
 
-func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam) (index []string) {
+type QueryBuilder struct {
+	Query []string
+}
+
+func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam) (idx []string) {
 
 	for _, param := range dict {
-		var idx string
+		var idx []string
 
 		for _, path := range param.Path {
 
 			fieldStack := helper.GetFieldInfoFromPath(path)
+			arryLen := len(fieldStack.ArrayPath)
 
-			if fieldStack.Length == 1 {
-				idx += fmt.Sprintf("CREATE INDEX `%s_%s` ON `%s`(%s) WHERE resourceType = `%s`", strings.ToLower(resource), fieldStack.Name, bucket, path, resource)
-				idx += fmt.Sprintf(" ")
-			} else {
-				var objects []string
-				var fields string
-				var arrays []string
 
-				for i := 0; i < fieldStack.Length; {
+			bucketQuery := fmt.Sprintf("CREATE INDEX `%s` ON `%s`",  fieldStack.Name, bucket)
+			idx = append(idx, bucketQuery)
 
-					fieldInfo := fieldStack.Fields.Pop().Value
+			if arryLen > 0 {
+				for i := 0; i <= arryLen; {
 
-					if fieldInfo.Object == true {
-						objects = append([]string{fieldInfo.Field}, objects...)
-						if i > 0 {
-							fields = strings.Join(objects, ".")
+					// Construct the first array Parameter
+					if i == 0 {
+						idx = append(idx, fmt.Sprintf("(DISTINCT ARRAY "))
+					} else if i == arryLen {
+						// Construct the last array Parameter
+						num := arryLen - i
+						// If multiple array found then syntax will be difference
+						if arryLen < 2 {
+							field := fieldStack.ArrayPath[arryLen-i]
+							if fieldStack.ObjectPath != "" {
+								// Condition for []array.obj
+								idx = append(idx, fmt.Sprintf("a%d.%s FOR a%d IN %s END, %s)", num, fieldStack.ObjectPath, num, field, field))
+							} else {
+								// For Covered Array Indexing , the Last parameter suppose to be the array
+								covered := strings.Split(field, ".")
+								// Condition for []array.[]array or []array.obj.[]array
+								idx = append(idx, fmt.Sprintf("a%d FOR a%d IN %s END, %s)", num, num, field, covered[len(covered)-1]))
+							}
 						}else{
-							// this object is a part of array
-							arrays = append(arrays, fmt.Sprintf("d%d.%s",i+1, strings.Join(objects,".")))
+							idx = append(idx, fmt.Sprintf("FOR a%d IN %s END)", num, fieldStack.ArrayPath[arryLen-i]))
 						}
+
 					} else {
-						if i == 0 {
-							// Its an nested Array
-							a := fmt.Sprintf("(DISTINCT ARRAY d%d FOR d%d IN d%d.%s END, %s)", i, i,i+1, fieldInfo.Field, fieldInfo.Field)
-							arrays = append(arrays, a)
+						// Everything in between the first array Parameter
+						if fieldStack.ObjectPath != "" {
+							idx = append(idx, fmt.Sprintf("(DISTINCT ARRAY a%d.%s FOR a%d IN a%d.%s END) ", i, fieldStack.ObjectPath, i, i-1, fieldStack.ArrayPath[i]))
 						} else {
-							arrays = append([]string{"DISTINCT ARRAY"}, arrays...)
-							arrays = append(arrays, fmt.Sprintf("FOR d%d IN %s END, %s", i, fieldInfo.Field, fieldInfo.Field))
+							idx = append(idx, fmt.Sprintf("(DISTINCT ARRAY a%d FOR a%d IN a%d.%s END) ", i, i, i-1, fieldStack.ArrayPath[i]))
 						}
-						fields = strings.Join(arrays, " ")
 					}
 					i++
 				}
-
-				idx += fmt.Sprintf("CREATE INDEX `%s_%s` ON `%s`(%s) WHERE resourceType = `%s`", strings.ToLower(resource), fieldStack.Name, bucket, fields, resource)
-				idx += fmt.Sprintf(" ")
+			} else {
+				// For object parameter
+				idx = append(idx, fmt.Sprintf("(%s)", fieldStack.ObjectPath))
 			}
-		}
 
-		idx += " "
-		index = append(index, idx)
+			endQuery := fmt.Sprintf(" WHERE resourceType = '%s' ", resource)
+			idx = append(idx, endQuery)
+
+			fmt.Println(strings.Join(idx, ""))
+			idx = []string{}
+
+
+		}
 	}
 
-	return index
+	return idx
 }
