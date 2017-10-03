@@ -45,12 +45,6 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 	case "_id":
 		queryStruct.SearchResult.Type = "bundle"
 
-		fieldStack := helper.NewStack()
-		fieldStack.Push(&helper.Node{models.FieldInfo{
-			Field: "_id",
-			Array: false,
-		}})
-
 		queryStruct.FHIRType = "universal"
 		queryStruct.Condition = "="
 		queryStruct.Value.Value = queryParam
@@ -61,12 +55,6 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 
 	case "_lastUpdated":
 		queryStruct.SearchResult.Type = "bundle"
-
-		fieldStack := helper.NewStack()
-		fieldStack.Push(&helper.Node{models.FieldInfo{
-			Field: "lastUpdated",
-			Array: false,
-		}})
 
 		queryStruct.FHIRType = "universal"
 		getConditionNVal(&queryStruct, queryParam)
@@ -191,11 +179,8 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 	for _, path := range info.Path {
 
 		fv := helper.GetFieldInfoFromPath(path)
-
-		fieldStack := helper.NewStack()
-		fieldStack.Push(&helper.Node{models.FieldInfo{}})
-
-		queryStruct.Fields = fv
+		queryStruct.FieldsInfo.ArrayPath = fv.ArrayPath
+		queryStruct.FieldsInfo.ObjectPath = fv.ObjectPath
 
 		decodedParam = append(decodedParam, queryStruct)
 	}

@@ -23,22 +23,12 @@ func TestN1QLBuild(t *testing.T) {
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "restaurant?title=mr.burger"
-	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "restaurant", Query: p})
+	p := "Patient?language=https://code.system.org/lang|FR"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "restaurant?address=dhaka"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "restaurant", Query: p})
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "Observation?subject:Patient=23"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Observation", Query: p})
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "Patient?language=https://code.system.org/lang|FR"
+	p = "Patient?name:contains=Mr."
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
