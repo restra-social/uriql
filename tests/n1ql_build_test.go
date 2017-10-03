@@ -33,6 +33,16 @@ func TestN1QLBuild(t *testing.T) {
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
+	p = "Patient?organization=Medical/10234"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
+
+	p = "Patient?identifier=2345"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
+
 	///Observation?subject=Patient/23
 
 	/*decode = search.GetQueryDecoder(dictionary.RestaurantItemsDictionary())

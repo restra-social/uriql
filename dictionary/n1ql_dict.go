@@ -9,15 +9,15 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 
 		"Patient": map[string]models.SearchParam{
 
-			"active": models.SearchParam{
+			/*"active": models.SearchParam{
 				Type:      "token",
 				FieldType: "boolean",
 				Path:      []string{"active"},
-			},
+			},*/
 			"identifier": models.SearchParam{
 				Type:      "token",
 				FieldType: "identifier",
-				Path:      []string{"[]identifier.value", "identifier.[]system", "identifier.[]system.code"},
+				Path:      []string{"[]identifier.value", "[]identifier.system"},
 			},
 			"name": models.SearchParam{
 				Type:      "string",
