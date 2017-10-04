@@ -118,7 +118,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 					code := strings.Split(queryParam, "|")
 					queryStruct.Value.Codable.System = code[0] // https://some.com
 					queryStruct.Value.Codable.Code = code[1]   // FR
-				}else{
+				} else {
 					queryStruct.Value.Codable.Code = queryParam
 				}
 

@@ -1,6 +1,5 @@
 package models
 
-
 // SearchParam : Search Parameter Information
 type SearchParam struct {
 	Type      string   //
@@ -20,7 +19,7 @@ type DictionaryInfo struct {
 	FHIRFieldType string
 	FHIRType      string
 	FieldsInfo    struct {
-		ArrayPath []string
+		ArrayPath  []string
 		ObjectPath string
 	}
 }

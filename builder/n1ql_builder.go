@@ -16,7 +16,7 @@ func GetN1QLQueryBuilder(bucket string) *n1QLQueryBuilder {
 }
 
 func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
-	
+
 	var queryString []string
 
 	bucketQuery := fmt.Sprintf("SELECT * FROM `%s` as r WHERE  r.resourceType = 'Patient' and ", n.bucketName) // #todo fix resource
@@ -26,13 +26,13 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 
 		field := param.DictionaryInfo.FieldsInfo
 		arryLen := len(field.ArrayPath)
-		
+
 		objectPath := strings.Replace(field.ObjectPath, ".", "`.`", -1)
 
 		// Switch Statement is For Special Case
 		switch param.FHIRFieldType {
 
-		case "identifier", "coding" :
+		case "identifier", "coding":
 			// if Array Path Exists
 			if arryLen > 0 {
 				for i := 0; i <= arryLen; {
@@ -48,7 +48,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 							if objectPath == "system" {
 								o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.System)
 								queryString = append(queryString, o)
-							}else if objectPath == "value" {
+							} else if objectPath == "value" {
 								o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
 								queryString = append(queryString, o)
 							} else {
@@ -64,7 +64,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 						if objectPath == "system" {
 							o := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.System)
 							queryString = append(queryString, o)
-						}else if objectPath == "value" {
+						} else if objectPath == "value" {
 							o := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
 							queryString = append(queryString, o)
 						} else {

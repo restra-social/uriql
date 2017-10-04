@@ -21,8 +21,7 @@ func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[
 			fieldStack := helper.GetFieldInfoFromPath(path)
 			arryLen := len(fieldStack.ArrayPath)
 
-
-			bucketQuery := fmt.Sprintf("CREATE INDEX `%s` ON `%s`",  fieldStack.Name, bucket)
+			bucketQuery := fmt.Sprintf("CREATE INDEX `%s` ON `%s`", fieldStack.Name, bucket)
 			idx = append(idx, bucketQuery)
 
 			if arryLen > 0 {
@@ -46,7 +45,7 @@ func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[
 								// Condition for []array.[]array or []array.obj.[]array
 								idx = append(idx, fmt.Sprintf("a%d FOR a%d IN %s END, %s)", num, num, field, covered[len(covered)-1]))
 							}
-						}else{
+						} else {
 							idx = append(idx, fmt.Sprintf("FOR a%d IN %s END)", num, fieldStack.ArrayPath[arryLen-i]))
 						}
 
@@ -70,7 +69,6 @@ func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[
 
 			fmt.Println(strings.Join(idx, ""))
 			idx = []string{}
-
 
 		}
 	}

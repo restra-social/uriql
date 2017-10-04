@@ -38,12 +38,8 @@ func (n *cypherQueryBuilder) Build(allparam []models.QueryParam) string {
 
 			str += fmt.Sprintf("MATCH (u:%s{id:'%s'})-[r:%s]-(f)", model.RequestInfo.Type, model.RequestInfo.UserID, strings.ToUpper(model.Resource))
 
-			if len(model.Field) > 0 {
-				str += fmt.Sprintf(" WHERE ")
-				for _, field := range model.Field {
-					str += fmt.Sprintf("r.%s %s", field.Field, conNVal)
-				}
-			}
+			str += fmt.Sprintf(" WHERE ")
+			str += fmt.Sprintf("r.%s %s", model.FieldsInfo.ObjectPath, conNVal)
 
 			str += fmt.Sprintf(" RETURN f")
 
