@@ -112,13 +112,17 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 			case "string":
 				queryStruct.Condition = "="          // Assuming all string under token needs to be exact matched
 				queryStruct.Value.Value = queryParam // Mr.
-			case "coding":
+			case "coding", "identifier":
 				queryStruct.Condition = "=" // Assuming all string under token needs to be exact matched
-				code := strings.Split(queryParam, "|")
-				queryStruct.Value.Codable.System = code[0] // https://some.com
-				queryStruct.Value.Codable.Code = code[1]   // FR
+				if strings.Contains(queryParam, "|") {
+					code := strings.Split(queryParam, "|")
+					queryStruct.Value.Codable.System = code[0] // https://some.com
+					queryStruct.Value.Codable.Code = code[1]   // FR
+				}else{
+					queryStruct.Value.Codable.Code = queryParam
+				}
 
-			case "code", "identifier", "codeableConcept":
+			case "code", "codeableConcept":
 
 				queryStruct.Value.Value = queryParam
 

@@ -61,7 +61,15 @@ func GetFieldInfoFromPath(str string) (s StackInfo) {
 			//s.Fields.Push(&Node{fv})
 			s.Length++
 		}
-	} else {
+	}else if strings.HasPrefix(str, "[]") {
+		// lets say if []address
+		fv.Array = true
+		fv.Object = false
+		fv.Field = str[2:len(str)] // address
+
+		s.ArrayPath = append(s.ArrayPath, fv.Field)
+
+	}else {
 		// if active, gender
 		fv.Array = false
 		fv.Object = false
