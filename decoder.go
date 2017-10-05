@@ -5,6 +5,7 @@ import (
 	"github.com/kite-social/uriql/helper"
 	"github.com/kite-social/uriql/models"
 	"strings"
+	"fmt"
 )
 
 // QueryDecoder : Get Query Decoder Object
@@ -151,14 +152,13 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 
 		case "reference":
 			queryStruct.Condition = "="
+
 			if strings.Contains(queryParam, "/") {
-				val := strings.Split(queryParam, "/")
-				queryStruct.Value.Reference.Target = val[0]
-				queryStruct.Value.Reference.Value = val[1]
+				queryStruct.Value.Value = queryParam
 			} else {
 				// if the format is Patient?general-practitioner:Practitioner=23
-				queryStruct.Value.Reference.Target = queryStruct.Value.Modifiers // because then :Practitioner part goes to modifiers like but its not
-				queryStruct.Value.Reference.Value = queryParam
+				// because then :Practitioner part goes to modifiers like but its not
+				queryStruct.Value.Value = fmt.Sprintf("%s/%s", queryStruct.Value.Modifiers, queryParam)
 			}
 
 			// Additional Cases for Graph Type [relation, node , both]

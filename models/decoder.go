@@ -20,10 +20,6 @@ type QueryParam struct {
 
 // ValueType : Contains the value parameter from the query
 type ValueType struct {
-	Reference struct {
-		Target string
-		Value  string
-	}
 	Codable struct {
 		System string
 		Code   string

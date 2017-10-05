@@ -42,7 +42,7 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 			"language": models.SearchParam{
 				Type:      "token",
 				FieldType: "coding",
-				Path:      []string{"[]communication.language.[]coding.code"},
+				Path:      []string{"[]communication.language.[]coding.system","[]communication.language.[]coding.code"},
 			},
 			"general-practitioner": models.SearchParam{
 				Type:      "reference",

@@ -10,7 +10,7 @@ import (
 
 func printResult(t *testing.T, p string, qp interface{}, q string) {
 	t.Logf("Decoding : %s", p)
-	t.Logf("Decoded to : %+v", qp)
+	//t.Logf("Decoded to : %+v", qp)
 	t.Logf("Query %s", q)
 }
 
@@ -23,7 +23,7 @@ func TestN1QLBuild(t *testing.T) {
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "Patient?language=https://code.system.org/lang|FR"
+	p := "Patient?language=http://acme.org/patient|BN"
 	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
@@ -43,7 +43,7 @@ func TestN1QLBuild(t *testing.T) {
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "Patient?language=http://acme.org/patient|BN"
+	p = "Patient?general-practitioner=Practitioner/2345"
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)

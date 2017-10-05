@@ -29,6 +29,19 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 
 		objectPath := strings.Replace(field.ObjectPath, ".", "`.`", -1)
 
+		// Combine Condition and Value
+		var conNVal string
+		//#todo#fix token condition need to be fixed
+		// #todo , Filter string then pass to the sql , very dangerous to N1QL attack
+		switch param.Condition {
+		case "like":
+			conNVal = fmt.Sprintf("%s '%%%s%%'", param.Condition, param.Value.Value)
+		case "=":
+			conNVal = fmt.Sprintf("%s '%s'", param.Condition, param.Value.Value)
+		default:
+			conNVal = fmt.Sprintf("%s '%s'", param.Condition, param.Value.Value)
+		}
+
 		// Switch Statement is For Special Case
 		switch param.FHIRFieldType {
 
@@ -36,41 +49,42 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 			// if Array Path Exists
 			if arryLen > 0 {
 				for i := 0; i <= arryLen; {
+					var tempQuery string
 					// Construct the First array Parameter
 					if i == 0 {
 						queryString = append(queryString, fmt.Sprintf("ANY a%d IN r.%s SATISFIES ", i, field.ArrayPath[i]))
 					} else if i == arryLen && arryLen >= 1 {
 						// The End Query
+
 						if objectPath == "" {
-							o := fmt.Sprintf("a%d %s '%s' END", i-1, param.Condition, param.Value.Value)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d %s END", i-1, conNVal)
 						} else {
 							if objectPath == "system" {
-								o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.System)
-								queryString = append(queryString, o)
+								tempQuery = fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.System)
 							} else if objectPath == "value" {
-								o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
-								queryString = append(queryString, o)
-							} else {
-								o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Value)
-								queryString = append(queryString, o)
+								tempQuery = fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
+							} else if objectPath == "code" {
+								tempQuery = fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
+							}else {
+								tempQuery = fmt.Sprintf("a%d.`%s` %s END", i-1, objectPath, conNVal)
 							}
 						}
+						queryString = append(queryString, tempQuery)
 						// If multiple array then add the END
 						if i > 1 {
 							queryString = append(queryString, fmt.Sprintf(" END"))
 						}
 					} else if i == arryLen && arryLen == 1 {
 						if objectPath == "system" {
-							o := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.System)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.System)
 						} else if objectPath == "value" {
-							o := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
+						}else if objectPath == "code" {
+							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
 						} else {
-							o := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Value)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d.`%s` %s", i-1, objectPath, conNVal)
 						}
+						queryString = append(queryString, tempQuery)
 					} else {
 						// convert object.array into object`.`array
 						arrayPath := strings.Replace(field.ArrayPath[i], ".", "`.`", -1)
@@ -91,28 +105,28 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 			// if Array Path Exists
 			if arryLen > 0 {
 				for i := 0; i <= arryLen; {
+					var tempQuery string
 					// Construct the First array Parameter
 					if i == 0 {
 						queryString = append(queryString, fmt.Sprintf("ANY a%d IN r.%s SATISFIES ", i, field.ArrayPath[i]))
 					} else if i == arryLen && arryLen >= 1 {
 						// The End Query
 						if objectPath == "" {
-							o := fmt.Sprintf("a%d %s '%s' END", i-1, param.Condition, param.Value.Value)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d %s END", i-1, conNVal)
 						} else {
-							o := fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Value)
-							queryString = append(queryString, o)
+							tempQuery = fmt.Sprintf("a%d.`%s` %s END", i-1, objectPath, conNVal)
 						}
+						queryString = append(queryString, tempQuery)
 						// If multiple array then add the END
 						if i > 1 {
 							queryString = append(queryString, fmt.Sprintf(" END"))
 						}
 					} else if i == arryLen && arryLen == 1 {
-						q := fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Value)
-						queryString = append(queryString, q)
+						tempQuery = fmt.Sprintf("a%d.`%s` %s", i-1, objectPath, conNVal)
+						queryString = append(queryString, tempQuery)
 					} else {
-						q := fmt.Sprintf("ANY a%d IN a%d.`%s` SATISFIES ", i, i-1, field.ArrayPath[i])
-						queryString = append(queryString, q)
+						tempQuery =  fmt.Sprintf("ANY a%d IN a%d.`%s` SATISFIES ", i, i-1, field.ArrayPath[i])
+						queryString = append(queryString, tempQuery)
 					}
 					i++
 				}
