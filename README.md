@@ -1,39 +1,29 @@
 ### URI to Query Language Generator ( URIQL )
 
+## Currently Under Heavy Development . Not Stable
+
 ## Currently Supported Language are
  * N1QL ( Couchbase SQL like Query Language )
  * CYPHER ( Graph Database Neo4j )
 
 
+## Features
+ * N1QL Index Generation
+ * N1QL Query Generation
+ * CYPHER Query Generation
+
 This library helps to generate Query Language from URL Query
 Parameter based on Defined logic of the parameter
 
-## Index Generation from Dictionary
-
-```
-[]communication.language.[]coding.code
-```
-
-The above path will be decoded to
-
-```
-CREATE INDEX `patient_communication_language_coding_code` ON
-default( DISTINCT ARRAY
-         ( DISTINCE ARRAY c.code FOR c IN v.language.coding END, coding)
-        FOR `v` IN communication END, communication) WHERE resourceType = `Patient`
-```
-
 ## Example
-URI : Patient?name:contains=Mr.
+URI : `Patient?name:contains=Mr.`
 
 If the JSON data looks like this
 
 ```
   "name": [
     {
-      "family": [
-        "Levin"
-      ],
+      "family": "Levin",
       "given": [
         "Henry"
       ]
@@ -62,11 +52,22 @@ case "Patient" :
 The output will be like this
 
 ```
-select * from `default` as r where r.`resourceType` = 'Patient' and ANY n IN name satisfies
-(any family in n.`family` satisfies family like %Mr.% end) and (any given in n.`given` satisfies given like %Mr.% end)  end;
-
+SELECT * FROM `kite` as r WHERE  r.resourceType = 'Patient' and
+    ANY a0 IN r.name SATISFIES a0.`family` like '%Mr.%'
+    END
+OR
+    ANY a0 IN r.name SATISFIES
+        ANY a1 IN a0.`given` SATISFIES a1 like '%Mr.%'
+        END
+    END
 ```
 
+It also Generates Index for those array search
+
+```
+CREATE INDEX `name_family` ON `kite`(DISTINCT ARRAY a0.family FOR a0 IN name END, name) WHERE resourceType = 'Patient'
+CREATE INDEX `name_given` ON `kite`(DISTINCT ARRAY (DISTINCT ARRAY a1 FOR a1 IN a0.given END) FOR a0 IN name END) WHERE resourceType = 'Patient'
+```
 
 ### Search Implementation Status
 
