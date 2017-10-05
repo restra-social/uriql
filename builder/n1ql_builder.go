@@ -19,13 +19,15 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 
 	var queryString []string
 
-	bucketQuery := fmt.Sprintf("SELECT * FROM `%s` as r WHERE  r.resourceType = 'Patient' and ", n.bucketName) // #todo fix resource
+	bucketQuery := fmt.Sprintf("SELECT * FROM `%s` as r WHERE ", n.bucketName) // #todo fix resource
 	queryString = append(queryString, bucketQuery)
 
 	for n, param := range queryParam {
 
 		field := param.DictionaryInfo.FieldsInfo
 		arryLen := len(field.ArrayPath)
+
+		paramLength := len(queryParam)
 
 		objectPath := strings.Replace(field.ObjectPath, ".", "`.`", -1)
 
@@ -41,6 +43,17 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 		default:
 			conNVal = fmt.Sprintf("%s '%s'", param.Condition, param.Value.Value)
 		}
+
+		var tempQuery string
+		// this means there are multiple fields to search
+		if paramLength > 1 && param.FHIRType == "string" {
+			if n == 0 {
+				tempQuery = fmt.Sprintf("(")
+			}
+		} else {
+				tempQuery = fmt.Sprintf("r.resourceType = '%s' and ", param.Resource)
+		}
+		queryString = append(queryString, tempQuery)
 
 		// Switch Statement is For Special Case
 		switch param.FHIRFieldType {
@@ -135,9 +148,18 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", param.FieldsInfo.ObjectPath, param.Value.Value))
 			}
 
-			if len(queryParam) > 1 && n < len(queryParam)-1 {
-				queryString = append(queryString, " OR ")
+			if paramLength > 1 && param.FHIRType == "string" {
+				if len(queryParam) > 1 && n < len(queryParam)-1 {
+					tempQuery = fmt.Sprintf(" and r.resourceType = '%s') OR (r.resourceType = '%s' and ", param.Resource, param.Resource)
+					queryString = append(queryString, tempQuery)
+					}
+			}else {
+				if len(queryParam) > 1 && n < len(queryParam)-1 {
+					queryString = append(queryString, " OR ")
+					queryString = append(queryString, tempQuery)
+				}
 			}
+
 		}
 	}
 
