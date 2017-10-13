@@ -1,6 +1,6 @@
 package dictionary
 
-import "github.com/kite-social/uriql/models"
+import "github.com/restra-social/uriql/models"
 
 // N1QLDictionary : Example Dictionary for N1QL Query Builder
 func N1QLDictionary() map[string]map[string]models.SearchParam {
@@ -42,7 +42,7 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 			"language": models.SearchParam{
 				Type:      "token",
 				FieldType: "coding",
-				Path:      []string{"[]communication.language.[]coding.system","[]communication.language.[]coding.code"},
+				Path:      []string{"[]communication.language.[]coding.system", "[]communication.language.[]coding.code"},
 			},
 			"general-practitioner": models.SearchParam{
 				Type:      "reference",

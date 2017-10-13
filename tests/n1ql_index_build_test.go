@@ -1,9 +1,9 @@
 package tests
 
 import (
-	decoder "github.com/kite-social/uriql"
-	"github.com/kite-social/uriql/dictionary"
-	"github.com/kite-social/uriql/models"
+	decoder "github.com/restra-social/uriql"
+	"github.com/restra-social/uriql/dictionary"
+	"github.com/restra-social/uriql/models"
 	"testing"
 )
 

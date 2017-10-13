@@ -2,7 +2,7 @@ package builder
 
 import (
 	"fmt"
-	"github.com/kite-social/uriql/models"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 
@@ -51,7 +51,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				tempQuery = fmt.Sprintf("(")
 			}
 		} else {
-				tempQuery = fmt.Sprintf("r.resourceType = '%s' and ", param.Resource)
+			tempQuery = fmt.Sprintf("r.resourceType = '%s' and ", param.Resource)
 		}
 		queryString = append(queryString, tempQuery)
 
@@ -78,7 +78,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 								tempQuery = fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
 							} else if objectPath == "code" {
 								tempQuery = fmt.Sprintf("a%d.`%s` %s '%s' END", i-1, objectPath, param.Condition, param.Value.Codable.Code)
-							}else {
+							} else {
 								tempQuery = fmt.Sprintf("a%d.`%s` %s END", i-1, objectPath, conNVal)
 							}
 						}
@@ -92,7 +92,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.System)
 						} else if objectPath == "value" {
 							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
-						}else if objectPath == "code" {
+						} else if objectPath == "code" {
 							tempQuery = fmt.Sprintf("a%d.`%s` %s '%s'", i-1, objectPath, param.Condition, param.Value.Codable.Code)
 						} else {
 							tempQuery = fmt.Sprintf("a%d.`%s` %s", i-1, objectPath, conNVal)
@@ -138,7 +138,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 						tempQuery = fmt.Sprintf("a%d.`%s` %s", i-1, objectPath, conNVal)
 						queryString = append(queryString, tempQuery)
 					} else {
-						tempQuery =  fmt.Sprintf("ANY a%d IN a%d.`%s` SATISFIES ", i, i-1, field.ArrayPath[i])
+						tempQuery = fmt.Sprintf("ANY a%d IN a%d.`%s` SATISFIES ", i, i-1, field.ArrayPath[i])
 						queryString = append(queryString, tempQuery)
 					}
 					i++
@@ -152,8 +152,8 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				if len(queryParam) > 1 && n < len(queryParam)-1 {
 					tempQuery = fmt.Sprintf(" and r.resourceType = '%s') OR (r.resourceType = '%s' and ", param.Resource, param.Resource)
 					queryString = append(queryString, tempQuery)
-					}
-			}else {
+				}
+			} else {
 				if len(queryParam) > 1 && n < len(queryParam)-1 {
 					queryString = append(queryString, " OR ")
 					queryString = append(queryString, tempQuery)

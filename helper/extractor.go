@@ -2,7 +2,7 @@ package helper
 
 import (
 	"fmt"
-	"github.com/kite-social/uriql/models"
+	"github.com/restra-social/uriql/models"
 	"regexp"
 	"strings"
 )

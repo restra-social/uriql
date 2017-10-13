@@ -2,8 +2,8 @@ package builder
 
 import (
 	"fmt"
-	"github.com/kite-social/uriql/helper"
-	"github.com/kite-social/uriql/models"
+	"github.com/restra-social/uriql/helper"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 

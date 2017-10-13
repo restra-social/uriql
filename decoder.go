@@ -1,11 +1,11 @@
 package uriql
 
 import (
-	"github.com/kite-social/uriql/builder"
-	"github.com/kite-social/uriql/helper"
-	"github.com/kite-social/uriql/models"
-	"strings"
 	"fmt"
+	"github.com/restra-social/uriql/builder"
+	"github.com/restra-social/uriql/helper"
+	"github.com/restra-social/uriql/models"
+	"strings"
 )
 
 // QueryDecoder : Get Query Decoder Object

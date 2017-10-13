@@ -1,6 +1,6 @@
 package dictionary
 
-import "github.com/kite-social/uriql/models"
+import "github.com/restra-social/uriql/models"
 
 // CypherDictionary : Example Dictionary for Cypher Query builder
 func CypherDictionary() map[string]map[string]models.SearchParam {
