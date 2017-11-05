@@ -217,7 +217,7 @@ func getConditionNVal(queryStruct *models.QueryParam, queryParam string) {
 
 type QueryIndex struct {
 	Resource string
-	Indexes  []string
+	Indexes []models.IndexQueryBuilder
 }
 
 /*
@@ -230,8 +230,7 @@ func (f *QueryDecoder) DecodeQueryIndex() []QueryIndex {
 	for resource, dict := range f.Def.Dictionary.Model {
 		var idx QueryIndex
 		idx.Resource = resource
-		var indexBuilder builder.QueryBuilder
-		idx.Indexes = indexBuilder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
+		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
 		index = append(index, idx)
 	}
 	return index

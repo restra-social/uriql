@@ -7,13 +7,12 @@ import (
 	"strings"
 )
 
-type QueryBuilder struct {
-	Query []string
-}
+func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam) []models.IndexQueryBuilder {
 
-func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam) (idx []string) {
+	var indexes []models.IndexQueryBuilder
 
 	for _, param := range dict {
+
 		var idx []string
 
 		for _, path := range param.Path {
@@ -67,11 +66,17 @@ func (q *QueryBuilder) BuildQueryIndex(bucket string, resource string, dict map[
 			endQuery := fmt.Sprintf(" WHERE resourceType = '%s' ", resource)
 			idx = append(idx, endQuery)
 
-			fmt.Println(strings.Join(idx, ""))
+			queryIndex := strings.Join(idx, "")
 			idx = []string{}
+
+			var index models.IndexQueryBuilder
+			index.Name = fieldStack.Name
+			index.Query = queryIndex
+
+			indexes = append(indexes, index)
 
 		}
 	}
 
-	return idx
+	return indexes
 }
