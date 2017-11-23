@@ -1,7 +1,7 @@
 package tests
 
 import (
-	decoder "github.com/restra-social/uriql"
+	decoder "github.com/bhromor/uriql"
 	search "github.com/bhromor/uriql/builder"
 	"github.com/bhromor/uriql/dictionary"
 	"github.com/bhromor/uriql/models"

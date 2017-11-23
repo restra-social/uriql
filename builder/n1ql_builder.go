@@ -8,18 +8,19 @@ import (
 
 type n1QLQueryBuilder struct {
 	bucketName string
+	resourceIdentifierName string 
 }
 
 // GetN1QLQueryBuilder : Get N1QL Builder Object
-func GetN1QLQueryBuilder(bucket string) *n1QLQueryBuilder {
-	return &n1QLQueryBuilder{bucketName: bucket}
+func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *n1QLQueryBuilder {
+	return &n1QLQueryBuilder{bucketName: bucket, resourceIdentifierName: resourceIdentifier}
 }
 
-func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
+func (builder *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 
 	var queryString []string
 
-	bucketQuery := fmt.Sprintf("SELECT * FROM `%s` as r WHERE ", n.bucketName) // #todo fix resource
+	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` as r WHERE ", builder.bucketName) // #todo fix resource
 	queryString = append(queryString, bucketQuery)
 
 	for n, param := range queryParam {
@@ -51,7 +52,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				tempQuery = fmt.Sprintf("(")
 			}
 		} else {
-			tempQuery = fmt.Sprintf("r.resourceType = '%s' and ", param.Resource)
+			tempQuery = fmt.Sprintf("r.`%s` = '%s' and ", builder.resourceIdentifierName, param.Resource)
 		}
 		queryString = append(queryString, tempQuery)
 
@@ -108,7 +109,7 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				}
 			} else {
 				// For object parameter
-				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", param.FieldsInfo.ObjectPath, param.Value.Value))
+				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", objectPath, param.Value.Value))
 			}
 
 			if len(queryParam) > 1 && n < len(queryParam)-1 {
@@ -145,12 +146,12 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 				}
 			} else {
 				// For object parameter
-				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", param.FieldsInfo.ObjectPath, param.Value.Value))
+				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", objectPath, param.Value.Value))
 			}
 
 			if paramLength > 1 && param.FHIRType == "string" {
 				if len(queryParam) > 1 && n < len(queryParam)-1 {
-					tempQuery = fmt.Sprintf(" and r.resourceType = '%s') OR (r.resourceType = '%s' and ", param.Resource, param.Resource)
+					tempQuery = fmt.Sprintf(" and r.`%s` = '%s') OR (r.`%s` = '%s' and ", builder.resourceIdentifierName, param.Resource, builder.resourceIdentifierName, param.Resource)
 					queryString = append(queryString, tempQuery)
 				}
 			} else {
@@ -158,6 +159,9 @@ func (n *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 					queryString = append(queryString, " OR ")
 					queryString = append(queryString, tempQuery)
 				}
+			}
+			if n == paramLength-1 {
+				queryString = append(queryString, ")")
 			}
 
 		}

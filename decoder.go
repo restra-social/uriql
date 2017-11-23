@@ -217,7 +217,7 @@ func getConditionNVal(queryStruct *models.QueryParam, queryParam string) {
 
 type QueryIndex struct {
 	Resource string
-	Indexes []models.IndexQueryBuilder
+	Indexes  []models.IndexQueryBuilder
 }
 
 /*

@@ -10,8 +10,9 @@ type SearchParam struct {
 
 // Dictionary model
 type Dictionary struct {
-	Model  map[string]map[string]SearchParam
-	Bucket string
+	Model              map[string]map[string]SearchParam
+	Bucket             string
+	ResourceIdentifier string
 }
 
 // DictionaryInfo : Contains elaborated information about the fields exists in the dictionary

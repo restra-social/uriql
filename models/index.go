@@ -1,6 +1,6 @@
 package models
 
 type IndexQueryBuilder struct {
-	Name string
+	Name  string
 	Query string
 }
