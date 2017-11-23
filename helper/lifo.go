@@ -2,7 +2,7 @@ package helper
 
 import (
 	"fmt"
-	"github.com/restra-social/uriql/models"
+	"github.com/bhromor/uriql/models"
 )
 
 type Node struct {

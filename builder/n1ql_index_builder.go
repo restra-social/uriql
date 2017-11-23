@@ -2,8 +2,8 @@ package builder
 
 import (
 	"fmt"
-	"github.com/restra-social/uriql/helper"
-	"github.com/restra-social/uriql/models"
+	"github.com/bhromor/uriql/helper"
+	"github.com/bhromor/uriql/models"
 	"strings"
 )
 

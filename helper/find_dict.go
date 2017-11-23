@@ -1,6 +1,6 @@
 package helper
 
-import "github.com/restra-social/uriql/models"
+import "github.com/bhromor/uriql/models"
 
 // Def :
 type Def struct {
