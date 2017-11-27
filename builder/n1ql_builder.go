@@ -154,14 +154,17 @@ func (builder *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
 					tempQuery = fmt.Sprintf(" and r.`%s` = '%s') OR (r.`%s` = '%s' and ", builder.resourceIdentifierName, param.Resource, builder.resourceIdentifierName, param.Resource)
 					queryString = append(queryString, tempQuery)
 				}
+				// append ) at then end of query if multiple found
+
+				if n == paramLength-1 {
+					queryString = append(queryString, ")")
+				}
+
 			} else {
 				if len(queryParam) > 1 && n < len(queryParam)-1 {
 					queryString = append(queryString, " OR ")
 					queryString = append(queryString, tempQuery)
 				}
-			}
-			if n == paramLength-1 {
-				queryString = append(queryString, ")")
 			}
 
 		}

@@ -224,13 +224,13 @@ type QueryIndex struct {
 DecodeQueryIndex : Builds Query Index Query out of Dictionary
 todo--add better exception handeling
 */
-func (f *QueryDecoder) DecodeQueryIndex() []QueryIndex {
+func (f *QueryDecoder) DecodeQueryIndex(resourceType string) []QueryIndex {
 
 	var index []QueryIndex
 	for resource, dict := range f.Def.Dictionary.Model {
 		var idx QueryIndex
 		idx.Resource = resource
-		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict)
+		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict, resourceType)
 		index = append(index, idx)
 	}
 	return index

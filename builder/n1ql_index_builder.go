@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam) []models.IndexQueryBuilder {
+func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam, resourceType string) []models.IndexQueryBuilder {
 
 	var indexes []models.IndexQueryBuilder
 
@@ -63,7 +63,7 @@ func BuildQueryIndex(bucket string, resource string, dict map[string]models.Sear
 				idx = append(idx, fmt.Sprintf("(%s)", fieldStack.ObjectPath))
 			}
 
-			endQuery := fmt.Sprintf(" WHERE resourceType = '%s' ", resource)
+			endQuery := fmt.Sprintf(" WHERE %s = '%s' ", resourceType, resource)
 			idx = append(idx, endQuery)
 
 			queryIndex := strings.Join(idx, "")
