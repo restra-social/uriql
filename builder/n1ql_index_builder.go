@@ -2,14 +2,16 @@ package builder
 
 import (
 	"fmt"
-	"github.com/bhromor/uriql/helper"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/helper"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 
-func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam, resourceType string) []models.IndexQueryBuilder {
+func BuildQueryIndex(bucket string, resource string, dict map[string]models.SearchParam, resourceType string) models.IndexInfo {
 
-	var indexes []models.IndexQueryBuilder
+	var indexInfo models.IndexInfo
+
+	indexes := make(map[string]string)
 
 	for _, param := range dict {
 
@@ -20,7 +22,7 @@ func BuildQueryIndex(bucket string, resource string, dict map[string]models.Sear
 			fieldStack := helper.GetFieldInfoFromPath(path)
 			arryLen := len(fieldStack.ArrayPath)
 
-			bucketQuery := fmt.Sprintf("CREATE INDEX `%s` ON `%s`", fieldStack.Name, bucket)
+			bucketQuery := fmt.Sprintf("CREATE INDEX `%s_%s` ON `%s`", resource, fieldStack.Name, bucket)
 			idx = append(idx, bucketQuery)
 
 			if arryLen > 0 {
@@ -68,15 +70,13 @@ func BuildQueryIndex(bucket string, resource string, dict map[string]models.Sear
 
 			queryIndex := strings.Join(idx, "")
 			idx = []string{}
-
-			var index models.IndexQueryBuilder
-			index.Name = fieldStack.Name
-			index.Query = queryIndex
-
-			indexes = append(indexes, index)
-
+			// append resource name before index name to avoid colision like `id` field
+			indexName := fmt.Sprintf("%s_%s", resource, fieldStack.Name)
+			indexes[indexName] = queryIndex
 		}
 	}
 
-	return indexes
+	indexInfo.Info = indexes
+
+	return indexInfo
 }

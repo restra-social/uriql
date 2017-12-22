@@ -2,13 +2,13 @@ package builder
 
 import (
 	"fmt"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 
 type n1QLQueryBuilder struct {
-	bucketName string
-	resourceIdentifierName string 
+	bucketName             string
+	resourceIdentifierName string
 }
 
 // GetN1QLQueryBuilder : Get N1QL Builder Object

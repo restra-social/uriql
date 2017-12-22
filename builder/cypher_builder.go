@@ -2,7 +2,7 @@ package builder
 
 import (
 	"fmt"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 

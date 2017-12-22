@@ -1,6 +1,6 @@
 package dictionary
 
-import "github.com/bhromor/uriql/models"
+import "github.com/restra-social/uriql/models"
 
 // N1QLDictionary : Example Dictionary for N1QL Query Builder
 func N1QLDictionary() map[string]map[string]models.SearchParam {

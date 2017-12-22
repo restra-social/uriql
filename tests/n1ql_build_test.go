@@ -2,9 +2,9 @@ package tests
 
 import (
 	decoder "github.com/bhromor/uriql"
-	search "github.com/bhromor/uriql/builder"
-	"github.com/bhromor/uriql/dictionary"
-	"github.com/bhromor/uriql/models"
+	search "github.com/restra-social/uriql/builder"
+	"github.com/restra-social/uriql/dictionary"
+	"github.com/restra-social/uriql/models"
 	"testing"
 )
 

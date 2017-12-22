@@ -2,8 +2,8 @@ package tests
 
 import (
 	decoder "github.com/bhromor/uriql"
-	"github.com/bhromor/uriql/dictionary"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/dictionary"
+	"github.com/restra-social/uriql/models"
 	"testing"
 )
 

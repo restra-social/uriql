@@ -2,7 +2,7 @@ package helper
 
 import (
 	"fmt"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/models"
 	"regexp"
 	"strings"
 )

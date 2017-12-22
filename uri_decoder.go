@@ -1,6 +1,6 @@
 package uriql
 
-import "github.com/bhromor/uriql/models"
+import "github.com/restra-social/uriql/models"
 
 // URIDecoder :
 type URIDecoder struct {

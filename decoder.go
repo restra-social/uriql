@@ -2,9 +2,9 @@ package uriql
 
 import (
 	"fmt"
-	"github.com/bhromor/uriql/builder"
-	"github.com/bhromor/uriql/helper"
-	"github.com/bhromor/uriql/models"
+	"github.com/restra-social/uriql/builder"
+	"github.com/restra-social/uriql/helper"
+	"github.com/restra-social/uriql/models"
 	"strings"
 )
 
@@ -215,23 +215,21 @@ func getConditionNVal(queryStruct *models.QueryParam, queryParam string) {
 	}
 }
 
-type QueryIndex struct {
-	Resource string
-	Indexes  []models.IndexQueryBuilder
-}
-
 /*
 DecodeQueryIndex : Builds Query Index Query out of Dictionary
 todo--add better exception handeling
 */
-func (f *QueryDecoder) DecodeQueryIndex(resourceType string) []QueryIndex {
+func (f *QueryDecoder) DecodeQueryIndex(resourceType string) models.Migrations {
 
-	var index []QueryIndex
+	var queryIndexes models.Migrations
+
+	indexes := make(map[string]models.IndexInfo)
+
 	for resource, dict := range f.Def.Dictionary.Model {
-		var idx QueryIndex
-		idx.Resource = resource
-		idx.Indexes = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict, resourceType)
-		index = append(index, idx)
+
+		indexes[resource] = builder.BuildQueryIndex(f.Def.Dictionary.Bucket, resource, dict, resourceType)
 	}
-	return index
+
+	queryIndexes.Indexes.Migration = indexes
+	return queryIndexes
 }
