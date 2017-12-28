@@ -15,6 +15,6 @@ func GetURIDecoder(dict *models.Dictionary) *URIDecoder {
 }
 
 // Decode : Decodes Query String from Request Info
-func (b *URIDecoder) Decode(request models.RequestInfo) []models.QueryParam {
+func (b *URIDecoder) Decode(request models.RequestInfo) [][]models.QueryParam {
 	return b.Decoder.DecodeQueryString(request)
 }

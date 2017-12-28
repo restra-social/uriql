@@ -1,7 +1,7 @@
 package tests
 
 import (
-	decoder "github.com/bhromor/uriql"
+	decoder "github.com/restra-social/uriql"
 	search "github.com/restra-social/uriql/builder"
 	"github.com/restra-social/uriql/dictionary"
 	"github.com/restra-social/uriql/models"
@@ -16,19 +16,29 @@ func printResult(t *testing.T, p string, qp interface{}, q string) {
 
 func TestN1QLBuild(t *testing.T) {
 
-	dict := &models.Dictionary{Model: dictionary.N1QLDictionary(), Bucket: "kite"}
+	dict := &models.Dictionary{Model: dictionary.N1QLDictionary(), Bucket: "restra"}
 
 	decode := decoder.GetQueryDecoder(dict)
-	builder := search.GetN1QLQueryBuilder(dict.Bucket)
+	builder := search.GetN1QLQueryBuilder(dict.Bucket, "type")
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "Patient?language=http://acme.org/patient|BN"
-	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
+	p := "profile?name=mr&hobbies=sports"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p})
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "Patient?name:contains=Mr."
+	p = "profile?hobbies=sports"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p, Filter: models.Filter{Limit: 10, Page: 1}})
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
+
+	p = "profile?name=mr"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p, Filter: models.Filter{Limit: 10, Page: 3}})
+	q = builder.Build(qp)
+	printResult(t, p, qp, q)
+
+	/*p = "Patient?name:contains=Mr."
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
@@ -56,7 +66,7 @@ func TestN1QLBuild(t *testing.T) {
 	p = "Patient?address-use=Dhaka"
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})
 	q = builder.Build(qp)
-	printResult(t, p, qp, q)
+	printResult(t, p, qp, q)*/
 
 	///Observation?subject=Patient/23
 

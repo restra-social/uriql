@@ -1,6 +1,9 @@
 ### URI to Query Language Generator ( URIQL )
 
-## Currently Under Heavy Development . Not Stable
+## Currently Under Heavy Development. Not Stable
+
+# Composit Parameter is supported now
+Ex `profile?name=romain&address=Dhaka&hobbies=sport` ( Experimental )
 
 ## Currently Supported Language are
  * N1QL ( Couchbase SQL like Query Language )
@@ -84,7 +87,7 @@ CREATE INDEX `name_given` ON `kite`(DISTINCT ARRAY (DISTINCT ARRAY a1 FOR a1 IN 
 |	| Identifier 	| 50% | Done
 | Reference | None | 80% |
 | Reference | None | 100% | Done |
-| Composite | None | 0% |
+| Composite | Partial | 70% |
 | Quantity | None | 50% |
 | URI | None | 0% |
 | _id | None | 0% |

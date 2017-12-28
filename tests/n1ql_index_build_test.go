@@ -1,7 +1,7 @@
 package tests
 
 import (
-	decoder "github.com/bhromor/uriql"
+	decoder "github.com/restra-social/uriql"
 	"github.com/restra-social/uriql/dictionary"
 	"github.com/restra-social/uriql/models"
 	"testing"
@@ -13,12 +13,12 @@ func TestN1QLIndexBuild(t *testing.T) {
 
 	d := decoder.GetQueryDecoder(dict)
 
-	idxx := d.DecodeQueryIndex()
+	idxx := d.DecodeQueryIndex("type")
 
-	for _, idx := range idxx {
+	for _, idx := range idxx.Indexes.Migration {
 
 		//t.Log(idx)
-		for _, k := range idx.Indexes {
+		for _, k := range idx.Info {
 			t.Log(k)
 		}
 	}

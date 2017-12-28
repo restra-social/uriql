@@ -2,73 +2,60 @@ package dictionary
 
 import "github.com/restra-social/uriql/models"
 
-// N1QLDictionary : Example Dictionary for N1QL Query Builder
 func N1QLDictionary() map[string]map[string]models.SearchParam {
 
 	dict := map[string]map[string]models.SearchParam{
 
-		"Patient": map[string]models.SearchParam{
+		"profile": map[string]models.SearchParam{
 
-			"active": models.SearchParam{
-				Type:      "token",
-				FieldType: "boolean",
-				Path:      []string{"active"},
-			},
-			"identifier": models.SearchParam{
-				Type:      "token",
-				FieldType: "identifier",
-				Path:      []string{"[]identifier.system", "[]identifier.value"},
+			"_id": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"id"},
 			},
 			"gender": models.SearchParam{
-				Type:      "token",
-				FieldType: "code",
+				Type:      "string",
+				FieldType: "string",
 				Path:      []string{"gender"},
 			},
 			"name": models.SearchParam{
 				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"[]name.family", "[]name.[]given", "[]name.[]prefix", "[]name.[]suffix", "[]name.text"},
+				Path:      []string{"name.prefix", "name.first_name", "name.last_name"},
 			},
-			"address-state": models.SearchParam{
+			"address": models.SearchParam{
 				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"[]address.state", "testing.[]something"},
+				Path:      []string{"address.city.name", "address.state.name", "address.street"},
 			},
-			"address-use": models.SearchParam{
-				Type:      "token",
+			"hobbies": models.SearchParam{
+				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"[]address.use"},
+				Path:      []string{"[]hobbies"},
 			},
-			"language": models.SearchParam{
-				Type:      "token",
-				FieldType: "coding",
-				Path:      []string{"[]communication.language.[]coding.system", "[]communication.language.[]coding.code"},
-			},
-			"general-practitioner": models.SearchParam{
-				Type:      "reference",
+			"postal": models.SearchParam{
+				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"[]generalPractitioner.reference"},
-			},
-			"organization": models.SearchParam{
-				Type:      "reference",
-				FieldType: "string",
-				Path:      []string{"managingOrganization.reference"},
+				Path:      []string{"address.postal"},
 			},
 		},
 
-		"Encounter": map[string]models.SearchParam{
-			"length": models.SearchParam{
-				Type:      "number",
-				FieldType: "number",
-				Path:      []string{"length"},
-			},
-		},
+		"restaurant": map[string]models.SearchParam{
 
-		"Observation": map[string]models.SearchParam{
-			"subject": models.SearchParam{
-				Type:      "reference",
+			"_id": models.SearchParam{
+				Type:      "string",
 				FieldType: "string",
-				Path:      []string{"subject.reference"},
+				Path:      []string{"id"},
+			},
+			"title": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"title"},
+			},
+			"status": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"status"},
 			},
 		},
 	}

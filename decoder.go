@@ -20,21 +20,43 @@ func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	}
 }
 
+func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.QueryParam {
+	var queryParams [][]models.QueryParam
+
+	uri := strings.Split(request.Query, "?") // Trim ? from the Query Parameter
+	resource := uri[0]
+	query := uri[1]
+
+	var queryParam []models.QueryParam
+
+	if strings.Contains(query, "&") {
+		multiParam := strings.Split(query, "&")
+		for _, param := range multiParam {
+			queryParam = f.DecodeQuery(resource, param, request)
+			queryParams = append(queryParams, queryParam)
+		}
+	}else{
+		queryParam = f.DecodeQuery(resource, query, request)
+		queryParams = append(queryParams, queryParam)
+	}
+
+	return queryParams
+}
 /*
 DecodeQueryString : Decodes Request information into Query Parameter
 todo--add better exception handeling
 */
-func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.QueryParam {
+func (f *QueryDecoder) DecodeQuery(resource, queryRequest string, request models.RequestInfo) []models.QueryParam {
 	var decodedParam []models.QueryParam
 
 	var queryStruct models.QueryParam
 
 	// Assign the Request Info to Query Struct
+	// #todo add request info to parameter for further debugging purpose
 	queryStruct.RequestInfo = request
 
-	uri := strings.Split(request.Query, "?") // Trim ? from the Query Parameter
-
-	valueGet := strings.Split(uri[1], "=") // Split where it gets = sign
+	
+	valueGet := strings.Split(queryRequest, "=") // Split where it gets = sign
 	queryBase := valueGet[0]
 	queryParam := valueGet[1]
 
@@ -50,7 +72,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 		queryStruct.Condition = "="
 		queryStruct.Value.Value = queryParam
 
-		queryStruct.Resource = uri[0]
+		queryStruct.Resource = resource
 		decodedParam = append(decodedParam, queryStruct)
 		return decodedParam
 
@@ -60,7 +82,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 		queryStruct.FHIRType = "universal"
 		getConditionNVal(&queryStruct, queryParam)
 
-		queryStruct.Resource = uri[0]
+		queryStruct.Resource = resource
 		decodedParam = append(decodedParam, queryStruct)
 		return decodedParam
 
@@ -71,15 +93,15 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 			// name:contains
 			condition = strings.Split(queryBase, ":")           // name:contains=Mr
 			queryStruct.Value.Modifiers = condition[1]          // `contains`
-			info = f.Def.MatchSearchParam(uri[0], condition[0]) // Get information about the query from Dict `name`
+			info = f.Def.MatchSearchParam(resource, condition[0]) // Get information about the query from Dict `name`
 		} else {
-			info = f.Def.MatchSearchParam(uri[0], queryBase) // `name`
+			info = f.Def.MatchSearchParam(resource, queryBase) // `name`
 		}
 
 		// #todo#fix better exception handeling
 
 		if info.Type == "" && info.FieldType == "" {
-			panic("Definition of [" + uri[1] + "] not found in dictionary")
+			panic("Definition of [" + queryRequest + "] not found in dictionary")
 		}
 
 		queryStruct.FHIRType = info.Type
@@ -178,7 +200,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) []models.Qu
 			}
 		}
 	}
-	queryStruct.Resource = uri[0]
+	queryStruct.Resource = resource
 
 	for _, path := range info.Path {
 

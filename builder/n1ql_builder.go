@@ -9,6 +9,8 @@ import (
 type n1QLQueryBuilder struct {
 	bucketName             string
 	resourceIdentifierName string
+	page int
+	limit int
 }
 
 // GetN1QLQueryBuilder : Get N1QL Builder Object
@@ -16,14 +18,56 @@ func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *n1QLQueryBui
 	return &n1QLQueryBuilder{bucketName: bucket, resourceIdentifierName: resourceIdentifier}
 }
 
-func (builder *n1QLQueryBuilder) Build(queryParam []models.QueryParam) string {
+func (builder *n1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string {
+	builder.page = 1
+	builder.limit = 10
+
+
+	var queryString []string
+	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` AS r WHERE ", builder.bucketName) // #todo fix resource
+	queryString = append(queryString, bucketQuery)
+
+	len := len(queryParams)
+
+	queryString = append(queryString, "(")
+
+	for i, queryParam := range queryParams {
+		// wrap the whole query with brackets because of
+		// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/logicalops.html
+		// but dont apppend to last query
+
+		queryString = append(queryString, builder.BuildQueryString(queryParam))
+		// join each composite parameter as AND operation
+		if i != len-1 {
+			queryString = append(queryString, ") AND (")
+		}
+
+		// close the bracket only at the end
+		if i == len-1 {
+			queryString = append(queryString, ")")
+		}
+	}
+
+	if builder.page > 1 {
+		queryString = append(queryString, fmt.Sprintf(" LIMIT %d OFFSET %d", builder.limit, (builder.page-1) * builder.limit))
+	}else{
+		queryString = append(queryString, fmt.Sprintf(" LIMIT %d", builder.limit))
+	}
+
+	result := strings.Join(queryString, "")
+
+	return result
+}
+
+func (builder *n1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam) string {
 
 	var queryString []string
 
-	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` as r WHERE ", builder.bucketName) // #todo fix resource
-	queryString = append(queryString, bucketQuery)
-
 	for n, param := range queryParam {
+
+		//#todo assigning limit and offset again and again , not good , saperate filter from request info
+		builder.limit = param.Filter.Limit
+		builder.page = param.Filter.Page
 
 		field := param.DictionaryInfo.FieldsInfo
 		arryLen := len(field.ArrayPath)
