@@ -153,7 +153,7 @@ func (builder *n1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam
 				}
 			} else {
 				// For object parameter
-				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", objectPath, param.Value.Value))
+				queryString = append(queryString, fmt.Sprintf("r.`%s` %s", objectPath, conNVal))
 			}
 
 			if len(queryParam) > 1 && n < len(queryParam)-1 {
@@ -190,7 +190,7 @@ func (builder *n1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam
 				}
 			} else {
 				// For object parameter
-				queryString = append(queryString, fmt.Sprintf("r.`%s` = '%s'", objectPath, param.Value.Value))
+				queryString = append(queryString, fmt.Sprintf("r.`%s` %s", objectPath, conNVal))
 			}
 
 			if paramLength > 1 && param.FHIRType == "string" {
