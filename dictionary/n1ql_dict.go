@@ -28,6 +28,11 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 				FieldType: "string",
 				Path:      []string{"address.city.name", "address.state.name", "address.street"},
 			},
+			"address-street": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"address.street"},
+			},
 			"hobbies": models.SearchParam{
 				Type:      "string",
 				FieldType: "string",

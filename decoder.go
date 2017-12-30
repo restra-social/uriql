@@ -5,6 +5,8 @@ import (
 	"github.com/restra-social/uriql/builder"
 	"github.com/restra-social/uriql/helper"
 	"github.com/restra-social/uriql/models"
+	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -30,18 +32,51 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.
 	var queryParam []models.QueryParam
 
 	if strings.Contains(query, "&") {
-		multiParam := strings.Split(query, "&")
+
+		// decode multiple query
+		decodedQuery, err := url.ParseQuery(query)
+		if err != nil {
+			fmt.Println("Invalid Query String Format ", err.Error())
+			return nil
+		}
+
+		// check for pagination
+		var mainQuery string
+		if strings.Contains(query, "_") {
+			// split and saperate main query
+			mainQuery = strings.Split(query, "&_")[0]		//name=fahim&address=dhaka&_size=20
+
+			var limit int
+			var page int
+
+			if strings.Contains(query, "_size") && strings.Contains(query, "_page") {
+				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
+				page, err = strconv.Atoi(decodedQuery.Get("_page"))
+				request.Limit = limit
+				request.Page = page
+			} else if strings.Contains(query, "_page") {
+				page, err = strconv.Atoi(decodedQuery.Get("_page"))
+				request.Page = page
+				request.Limit = 10	// If no limit set then use default as 10
+			} else if strings.Contains(query, "_size") {
+				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
+				request.Limit = limit
+			}
+		}
+
+		multiParam := strings.Split(mainQuery, "&")
 		for _, param := range multiParam {
 			queryParam = f.DecodeQuery(resource, param, request)
 			queryParams = append(queryParams, queryParam)
 		}
-	}else{
+	} else {
 		queryParam = f.DecodeQuery(resource, query, request)
 		queryParams = append(queryParams, queryParam)
 	}
 
 	return queryParams
 }
+
 /*
 DecodeQueryString : Decodes Request information into Query Parameter
 todo--add better exception handeling
@@ -55,7 +90,6 @@ func (f *QueryDecoder) DecodeQuery(resource, queryRequest string, request models
 	// #todo add request info to parameter for further debugging purpose
 	queryStruct.RequestInfo = request
 
-	
 	valueGet := strings.Split(queryRequest, "=") // Split where it gets = sign
 	queryBase := valueGet[0]
 	queryParam := valueGet[1]
@@ -91,8 +125,8 @@ func (f *QueryDecoder) DecodeQuery(resource, queryRequest string, request models
 
 		if strings.Contains(queryBase, ":") {
 			// name:contains
-			condition = strings.Split(queryBase, ":")           // name:contains=Mr
-			queryStruct.Value.Modifiers = condition[1]          // `contains`
+			condition = strings.Split(queryBase, ":")             // name:contains=Mr
+			queryStruct.Value.Modifiers = condition[1]            // `contains`
 			info = f.Def.MatchSearchParam(resource, condition[0]) // Get information about the query from Dict `name`
 		} else {
 			info = f.Def.MatchSearchParam(resource, queryBase) // `name`
