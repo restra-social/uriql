@@ -9,8 +9,8 @@ import (
 type n1QLQueryBuilder struct {
 	bucketName             string
 	resourceIdentifierName string
-	page int
-	limit int
+	page                   int
+	limit                  int
 }
 
 // GetN1QLQueryBuilder : Get N1QL Builder Object
@@ -21,7 +21,6 @@ func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *n1QLQueryBui
 func (builder *n1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string {
 	builder.page = 1
 	builder.limit = 10
-
 
 	var queryString []string
 	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` AS r WHERE ", builder.bucketName) // #todo fix resource
@@ -49,8 +48,8 @@ func (builder *n1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string
 	}
 
 	if builder.page > 1 {
-		queryString = append(queryString, fmt.Sprintf(" LIMIT %d OFFSET %d", builder.limit, (builder.page-1) * builder.limit))
-	}else{
+		queryString = append(queryString, fmt.Sprintf(" LIMIT %d OFFSET %d", builder.limit, (builder.page-1)*builder.limit))
+	} else {
 		queryString = append(queryString, fmt.Sprintf(" LIMIT %d", builder.limit))
 	}
 

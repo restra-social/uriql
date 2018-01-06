@@ -6,6 +6,21 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 
 	dict := map[string]map[string]models.SearchParam{
 
+		"product": map[string]models.SearchParam{
+
+			"_id": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"id"},
+			},
+			"category": models.SearchParam{
+				Type:      "join",
+				FieldType: "string",
+				Path:      []string{"name"},
+				Join:      []string{"category", "variances"},
+			},
+		},
+
 		"profile": map[string]models.SearchParam{
 
 			"_id": models.SearchParam{

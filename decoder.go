@@ -44,7 +44,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.
 		var mainQuery string
 		if strings.Contains(query, "_") {
 			// split and saperate main query
-			mainQuery = strings.Split(query, "&_")[0]		//name=fahim&address=dhaka&_size=20
+			mainQuery = strings.Split(query, "&_")[0] //name=fahim&address=dhaka&_size=20
 
 			var limit int
 			var page int
@@ -57,7 +57,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.
 			} else if strings.Contains(query, "_page") {
 				page, err = strconv.Atoi(decodedQuery.Get("_page"))
 				request.Page = page
-				request.Limit = 10	// If no limit set then use default as 10
+				request.Limit = 10 // If no limit set then use default as 10
 			} else if strings.Contains(query, "_size") {
 				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
 				request.Limit = limit

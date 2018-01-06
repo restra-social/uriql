@@ -8,7 +8,7 @@ type Migrations struct {
 }
 
 type MigrationInfo struct {
-	Migration map[string]IndexInfo	`json:"migration"`
+	Migration map[string]IndexInfo `json:"migration"`
 }
 
 type IndexInfo struct {

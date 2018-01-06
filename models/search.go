@@ -24,7 +24,7 @@ type Sort struct {
 }
 
 type Filter struct {
-	Page int
-	Limit int
+	Page   int
+	Limit  int
 	Offset int
 }

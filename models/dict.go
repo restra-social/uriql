@@ -6,6 +6,7 @@ type SearchParam struct {
 	FieldType string   //
 	Path      []string //
 	Target    []string
+	Join      []string
 }
 
 // Dictionary model

@@ -23,7 +23,7 @@ func TestN1QLBuild(t *testing.T) {
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "profile?name=mr&hobbies=sports&_size=10&_page=2"
+	p := "profile?name:contains=mr&hobbies=sports&_size=10&_page=2"
 	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p})
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
