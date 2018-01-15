@@ -22,7 +22,7 @@ func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	}
 }
 
-func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.QueryParam {
+func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *models.Filter) [][]models.QueryParam {
 	var queryParams [][]models.QueryParam
 
 	uri := strings.Split(request.Query, "?") // Trim ? from the Query Parameter
@@ -52,15 +52,15 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo) [][]models.
 			if strings.Contains(query, "_size") && strings.Contains(query, "_page") {
 				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
 				page, err = strconv.Atoi(decodedQuery.Get("_page"))
-				request.Limit = limit
-				request.Page = page
+				filter.Limit = limit
+				filter.Page = page
 			} else if strings.Contains(query, "_page") {
 				page, err = strconv.Atoi(decodedQuery.Get("_page"))
-				request.Page = page
-				request.Limit = 10 // If no limit set then use default as 10
+				filter.Page = page
+				filter.Limit = 10 // If no limit set then use default as 10
 			} else if strings.Contains(query, "_size") {
 				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
-				request.Limit = limit
+				filter.Limit = limit
 			}
 		}
 

@@ -65,8 +65,8 @@ func (builder *n1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam
 	for n, param := range queryParam {
 
 		//#todo assigning limit and offset again and again , not good , saperate filter from request info
-		builder.limit = param.Filter.Limit
-		builder.page = param.Filter.Page
+		//builder.limit = param.Filter.Limit
+		//builder.page = param.Filter.Page
 
 		field := param.DictionaryInfo.FieldsInfo
 		arryLen := len(field.ArrayPath)
