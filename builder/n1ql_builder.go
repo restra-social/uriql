@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type n1QLQueryBuilder struct {
+type N1QLQueryBuilder struct {
 	bucketName             string
 	resourceIdentifierName string
 	page                   int
@@ -14,11 +14,11 @@ type n1QLQueryBuilder struct {
 }
 
 // GetN1QLQueryBuilder : Get N1QL Builder Object
-func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *n1QLQueryBuilder {
-	return &n1QLQueryBuilder{bucketName: bucket, resourceIdentifierName: resourceIdentifier}
+func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *N1QLQueryBuilder {
+	return &N1QLQueryBuilder{bucketName: bucket, resourceIdentifierName: resourceIdentifier}
 }
 
-func (builder *n1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string {
+func (builder *N1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string {
 	builder.page = 1
 	builder.limit = 10
 
@@ -58,7 +58,7 @@ func (builder *n1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string
 	return result
 }
 
-func (builder *n1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam) string {
+func (builder *N1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam) string {
 
 	var queryString []string
 
