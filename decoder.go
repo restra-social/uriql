@@ -26,7 +26,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *mod
 	var queryParams [][]models.QueryParam
 
 	uri := strings.Split(request.Query, "?") // Trim ? from the Query Parameter
-	resource := uri[0]
+	resource := request.Type
 	query := uri[1]
 
 	var queryParam []models.QueryParam

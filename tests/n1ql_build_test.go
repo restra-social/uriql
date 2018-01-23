@@ -23,18 +23,19 @@ func TestN1QLBuild(t *testing.T) {
 
 	t.Log("Testing Restaurant Parameter : ")
 
-	p := "profile?name:contains=mr&hobbies=sports&_size=10&_page=2"
-	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p})
+	var filter models.Filter
+	p := "profiles?name:contains=mr&hobbies=sports&_size=10&_page=2"
+	qp := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "profile?hobbies=sports&_size=10&_page=1"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p})
+	p = "profiles?hobbies=sports&_size=10&_page=1"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "profile?name:contains=mr&_page=3"
-	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p})
+	p = "profiles?name:contains=mr&_page=3"
+	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
 	q = builder.Build(qp)
 	printResult(t, p, qp, q)
 
