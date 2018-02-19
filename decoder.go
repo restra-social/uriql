@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"errors"
 )
 
 // QueryDecoder : Get Query Decoder Object
@@ -22,7 +23,7 @@ func GetQueryDecoder(dict *models.Dictionary) *QueryDecoder {
 	}
 }
 
-func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *models.Filter) [][]models.QueryParam {
+func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *models.Filter) (*models.QueryInfo, error) {
 	var queryParams [][]models.QueryParam
 
 	uri := strings.Split(request.Query, "?") // Trim ? from the Query Parameter
@@ -33,48 +34,58 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *mod
 
 	if strings.Contains(query, "&") {
 
+		// add default pagination parameter if not added
+		if !strings.Contains(query, "_") {
+			query = fmt.Sprintf("%s&_page=1&_size=10", query) // #todo remove hard coded Param
+		}
+
 		// decode multiple query
 		decodedQuery, err := url.ParseQuery(query)
 		if err != nil {
-			fmt.Println("Invalid Query String Format ", err.Error())
-			return nil
+			msg := fmt.Sprintf("Invalid Query String Format ", err.Error())
+			return &models.QueryInfo{}, errors.New(msg)
 		}
 
 		// check for pagination
 		var mainQuery string
-		if strings.Contains(query, "_") {
-			// split and saperate main query
-			mainQuery = strings.Split(query, "&_")[0] //name=fahim&address=dhaka&_size=20
+		// split and saperate main query
+		mainQuery = strings.Split(query, "&_")[0] //name=fahim&address=dhaka&_size=20
 
-			var limit int
-			var page int
+		var limit int
+		var page int
 
-			if strings.Contains(query, "_size") && strings.Contains(query, "_page") {
-				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
-				page, err = strconv.Atoi(decodedQuery.Get("_page"))
-				filter.Limit = limit
-				filter.Page = page
-			} else if strings.Contains(query, "_page") {
-				page, err = strconv.Atoi(decodedQuery.Get("_page"))
-				filter.Page = page
-				filter.Limit = 10 // If no limit set then use default as 10
-			} else if strings.Contains(query, "_size") {
-				limit, err = strconv.Atoi(decodedQuery.Get("_size"))
-				filter.Limit = limit
-			}
+		if strings.Contains(query, "_size") && strings.Contains(query, "_page") {
+			limit, err = strconv.Atoi(decodedQuery.Get("_size"))
+			page, err = strconv.Atoi(decodedQuery.Get("_page"))
+			filter.Limit = limit
+			filter.Page = page
+		} else if strings.Contains(query, "_page") {
+			page, err = strconv.Atoi(decodedQuery.Get("_page"))
+			filter.Page = page
+			filter.Limit = 10 // If no limit set then use default as 10
+		} else if strings.Contains(query, "_size") {
+			limit, err = strconv.Atoi(decodedQuery.Get("_size"))
+			filter.Limit = limit
 		}
+
 
 		multiParam := strings.Split(mainQuery, "&")
 		for _, param := range multiParam {
 			queryParam = f.DecodeQuery(resource, param, request)
 			queryParams = append(queryParams, queryParam)
 		}
+
+
 	} else {
 		queryParam = f.DecodeQuery(resource, query, request)
 		queryParams = append(queryParams, queryParam)
 	}
 
-	return queryParams
+	var queryInfo models.QueryInfo
+	queryInfo.Param = queryParams
+	queryInfo.Filter = filter
+
+	return &queryInfo, nil
 }
 
 /*

@@ -18,19 +18,24 @@ func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *N1QLQueryBui
 	return &N1QLQueryBuilder{bucketName: bucket, resourceIdentifierName: resourceIdentifier}
 }
 
-func (builder *N1QLQueryBuilder) Build(queryParams [][]models.QueryParam) string {
-	builder.page = 1
-	builder.limit = 10
+func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
+	
+	if queryInfo.Filter.Limit == 0 {
+		builder.limit = 10
+	}
+	if queryInfo.Filter.Page == 0 {
+		builder.page = 1
+	}
 
 	var queryString []string
 	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` AS r WHERE ", builder.bucketName) // #todo fix resource
 	queryString = append(queryString, bucketQuery)
 
-	len := len(queryParams)
+	len := len(queryInfo.Param)
 
 	queryString = append(queryString, "(")
 
-	for i, queryParam := range queryParams {
+	for i, queryParam := range queryInfo.Param {
 		// wrap the whole query with brackets because of
 		// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/logicalops.html
 		// but dont apppend to last query

@@ -7,6 +7,11 @@ type FieldInfo struct {
 	Object bool   // If the Field is an Object or Not
 }
 
+type QueryInfo struct {
+	Param [][]QueryParam
+	Filter *Filter
+}
+
 // QueryParam : Decoded information about the Query Parameter
 type QueryParam struct {
 	RequestInfo
