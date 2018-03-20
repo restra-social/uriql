@@ -25,7 +25,7 @@ func TestN1QLBuild(t *testing.T) {
 
 	var filter models.Filter
 
-	p := "order?store_id=1235&_size=10&_page=2"
+	p := "order?store_id=1235"
 	qp, err := decode.DecodeQueryString(models.RequestInfo{Type: "order", Query: p}, &filter)
 	if err != nil {
 		t.Errorf(err.Error())

@@ -27,9 +27,13 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 
 	if queryInfo.Filter.Limit == 0 {
 		builder.limit = 10
+	}else{
+		builder.limit = queryInfo.Filter.Limit
 	}
 	if queryInfo.Filter.Page == 0 {
 		builder.page = 1
+	}else{
+		builder.page = queryInfo.Filter.Page
 	}
 
 	var queryString []string
