@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const(
+	DefaultSelectStatement = "r*"
+	SelectResourceAs = "r"
+)
+
 type N1QLQueryBuilder struct {
 	bucketName             string
 	resourceIdentifierName string
@@ -19,7 +24,7 @@ func GetN1QLQueryBuilder(bucket string, resourceIdentifier string) *N1QLQueryBui
 }
 
 func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
-	
+
 	if queryInfo.Filter.Limit == 0 {
 		builder.limit = 10
 	}
@@ -28,18 +33,23 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 	}
 
 	var queryString []string
-	bucketQuery := fmt.Sprintf("SELECT r.* FROM `%s` AS r WHERE ", builder.bucketName) // #todo fix resource
-	queryString = append(queryString, bucketQuery)
 
-	len := len(queryInfo.Param)
+	// Check if Select choise is provided
+	selectQuery := fmt.Sprintf("SELECT ")
+	queryString = append(queryString, selectQuery)
 
-	queryString = append(queryString, "(")
+	len := len(queryInfo.Params)
 
-	for i, queryParam := range queryInfo.Param {
+	for i, queryParam := range queryInfo.Params {
 		// wrap the whole query with brackets because of
 		// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/logicalops.html
 		// but dont apppend to last query
 
+
+		if i == 0 { // Build only Once
+			queryString = append(queryString, builder.BuildSelectQueryString(queryParam[i]))
+			queryString = append(queryString, "(")
+		}
 		queryString = append(queryString, builder.BuildQueryString(queryParam))
 		// join each composite parameter as AND operation
 		if i != len-1 {
@@ -63,7 +73,27 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 	return result
 }
 
-func (builder *N1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParam) string {
+// #todo nested array is not supported
+func (builder *N1QLQueryBuilder) BuildSelectQueryString(queryInfo models.QueryParamInfo) string {
+
+	var query []string
+	for _, field := range queryInfo.DictionaryInfo.SelectStatement {
+		if strings.Contains(field, "[]") { // that is an array so make a select query
+
+			lastField := strings.Split(field, ".")
+
+			query = append(query,  fmt.Sprintf("ARRAY v FOR v IN %s WHEN v.%s %s '%s' END", strings.TrimPrefix(lastField[0], "[]"), lastField[1], queryInfo.Condition, queryInfo.Value.Value))
+		}else{
+			query = append(query, field)
+		}
+	}
+
+	selectQuery := strings.Join(query, ", ")
+
+	return fmt.Sprintf("%s FROM `%s` AS %s WHERE " , selectQuery,  builder.bucketName, SelectResourceAs) // #todo fix resource)
+}
+
+func (builder *N1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParamInfo) string {
 
 	var queryString []string
 

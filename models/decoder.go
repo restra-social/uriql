@@ -7,13 +7,18 @@ type FieldInfo struct {
 	Object bool   // If the Field is an Object or Not
 }
 
+// QueryInfo stores the decoded information about the query its slice of slice because of multiple
+// Query or Composite Query Parameter
+// Param length is the number of length passed by query parameter Ex : patient?name=fahim&dob=15-25-69&status=true | Param length is 3
+// The First slice represents the inner query path lets say if `name` parameter needs to searched in multiple json path then the number of length
+// Of []QueryParameter is the number of path to search
 type QueryInfo struct {
-	Param [][]QueryParam
+	Params  [][]QueryParamInfo
 	Filter *Filter
 }
 
 // QueryParam : Decoded information about the Query Parameter
-type QueryParam struct {
+type QueryParamInfo struct {
 	RequestInfo
 	DictionaryInfo
 	Resource     string

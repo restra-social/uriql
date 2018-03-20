@@ -1,6 +1,10 @@
 package helper
 
-import "github.com/restra-social/uriql/models"
+import (
+	"github.com/restra-social/uriql/models"
+	"errors"
+	"fmt"
+)
 
 // Def :
 type Def struct {
@@ -15,11 +19,12 @@ func GetDef(dictionary *models.Dictionary) *Def {
 }
 
 // MatchSearchParam : Finds query parameter information from dictionary
-func (f *Def) MatchSearchParam(resource, match string) *models.SearchParam {
+func (f *Def) MatchSearchParam(resource, match string) (*models.SearchParam, error) {
 	if res, ok := f.Dictionary.Model[resource]; ok {
 		if res, ok := res[match]; ok {
-			return &res
+			return &res, nil
 		}
 	}
-	return &models.SearchParam{}
+
+	return nil , errors.New(fmt.Sprintf("Could not find field [%s] in the %s dictionary", match , resource))
 }

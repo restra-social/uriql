@@ -14,7 +14,7 @@ func GetCypherBuilder() *cypherQueryBuilder {
 	return &cypherQueryBuilder{}
 }
 
-func (n *cypherQueryBuilder) Build(allparam []models.QueryParam) string {
+func (n *cypherQueryBuilder) Build(allparam []models.QueryParamInfo) string {
 
 	var str string
 	//total := len(allparam)

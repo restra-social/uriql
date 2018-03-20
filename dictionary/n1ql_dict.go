@@ -21,6 +21,26 @@ func N1QLDictionary() map[string]map[string]models.SearchParam {
 			},
 		},
 
+		"order": map[string]models.SearchParam{
+
+			"_id": models.SearchParam{ // will be used by admin
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"id"},
+			},
+			"store_id": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Select:    []string{"id", "type", "status", "[]stores.id"},
+				Path:      []string{"[]stores.id"}, // #todo must be case insensitive
+			},
+			"product_id": models.SearchParam{
+				Type:      "string",
+				FieldType: "string",
+				Path:      []string{"[]stores.[]orders.id"}, // #todo must be case insensitive
+			},
+		},
+
 		"profile": map[string]models.SearchParam{
 
 			"_id": models.SearchParam{

@@ -23,8 +23,10 @@ type Sort struct {
 	Type  string
 }
 
+// Filter represents Search Filter
+// How many pages to show , whats the limit etc
 type Filter struct {
-	Page   int
-	Limit  int
-	Offset int
+	Page   int // Page Number , 1 or 2 etc
+	Limit  int // Per Page Limit like 10 or 20
+	Offset int // Page Offset value , how many resource to exclude from the result from the top
 }
