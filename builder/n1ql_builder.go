@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-const(
+const (
 	DefaultSelectStatement = "r*"
-	SelectResourceAs = "r"
+	SelectResourceAs       = "r"
 )
 
 type N1QLQueryBuilder struct {
@@ -27,12 +27,12 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 
 	if queryInfo.Filter.Limit == 0 {
 		builder.limit = 10
-	}else{
+	} else {
 		builder.limit = queryInfo.Filter.Limit
 	}
 	if queryInfo.Filter.Page == 0 {
 		builder.page = 1
-	}else{
+	} else {
 		builder.page = queryInfo.Filter.Page
 	}
 
@@ -48,7 +48,6 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 		// wrap the whole query with brackets because of
 		// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/logicalops.html
 		// but dont apppend to last query
-
 
 		if i == 0 { // Build only Once
 			queryString = append(queryString, builder.BuildSelectQueryString(queryParam[i]))
@@ -86,15 +85,15 @@ func (builder *N1QLQueryBuilder) BuildSelectQueryString(queryInfo models.QueryPa
 
 			lastField := strings.Split(field, ".")
 
-			query = append(query,  fmt.Sprintf("ARRAY v FOR v IN %s WHEN v.%s %s '%s' END", strings.TrimPrefix(lastField[0], "[]"), lastField[1], queryInfo.Condition, queryInfo.Value.Value))
-		}else{
+			query = append(query, fmt.Sprintf("ARRAY v FOR v IN %s WHEN v.%s %s '%s' END", strings.TrimPrefix(lastField[0], "[]"), lastField[1], queryInfo.Condition, queryInfo.Value.Value))
+		} else {
 			query = append(query, field)
 		}
 	}
 
 	selectQuery := strings.Join(query, ", ")
 
-	return fmt.Sprintf("%s FROM `%s` AS %s WHERE " , selectQuery,  builder.bucketName, SelectResourceAs) // #todo fix resource)
+	return fmt.Sprintf("%s FROM `%s` AS %s WHERE ", selectQuery, builder.bucketName, SelectResourceAs) // #todo fix resource)
 }
 
 func (builder *N1QLQueryBuilder) BuildQueryString(queryParam []models.QueryParamInfo) string {

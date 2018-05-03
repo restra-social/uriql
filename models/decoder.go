@@ -13,7 +13,7 @@ type FieldInfo struct {
 // The First slice represents the inner query path lets say if `name` parameter needs to searched in multiple json path then the number of length
 // Of []QueryParameter is the number of path to search
 type QueryInfo struct {
-	Params  [][]QueryParamInfo
+	Params [][]QueryParamInfo
 	Filter *Filter
 }
 

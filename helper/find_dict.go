@@ -1,9 +1,9 @@
 package helper
 
 import (
-	"github.com/restra-social/uriql/models"
 	"errors"
 	"fmt"
+	"github.com/restra-social/uriql/models"
 )
 
 // Def :
@@ -26,5 +26,5 @@ func (f *Def) MatchSearchParam(resource, match string) (*models.SearchParam, err
 		}
 	}
 
-	return nil , errors.New(fmt.Sprintf("Could not find field [%s] in the %s dictionary", match , resource))
+	return nil, errors.New(fmt.Sprintf("Could not find field [%s] in the %s dictionary", match, resource))
 }

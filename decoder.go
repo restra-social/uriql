@@ -20,20 +20,18 @@ const (
 	ModifierIdentifier             = ":"
 	ModifierFieldForWildcardSearch = "contains"
 	ModifierFieldForExactMatch     = "exact"
-	ModifierForNotEqual = "not"
-	ModifierForGreaterThanEqual = "above"
-	ModifierForLessThanEqual = "below"
-	ModifierForWithin = "in"
-	ModifierForNotWithin = "not-in"
-
+	ModifierForNotEqual            = "not"
+	ModifierForGreaterThanEqual    = "above"
+	ModifierForLessThanEqual       = "below"
+	ModifierForWithin              = "in"
+	ModifierForNotWithin           = "not-in"
 
 	// Value Modifier
-	ValueModifierForGraterThan = "gt"
+	ValueModifierForGraterThan         = "gt"
 	ValueModifierForGraterThanAndEqual = "ge"
-	ValueModifierForLessThan = "lt"
-	ValueModifierForLessThanAndEqual = "le"
-	ValueModifierForNotEqual = "nt"
-
+	ValueModifierForLessThan           = "lt"
+	ValueModifierForLessThanAndEqual   = "le"
+	ValueModifierForNotEqual           = "nt"
 
 	PaginationIdentifier = "&_"
 
@@ -200,14 +198,14 @@ func (f *QueryDecoder) DecodeQuery(resource, queryRequest string, request models
 		// Check if the Parameter has Modifiers
 		if strings.Contains(queryBase, ModifierIdentifier) {
 			// name:contains
-			condition = strings.Split(queryBase, ModifierIdentifier) // name:contains=Mr
-			queryStruct.Value.Modifiers = condition[1]               // `contains`
-			info , err = f.Def.MatchSearchParam(resource, condition[0])    // Get information about the query from Dict `name`
+			condition = strings.Split(queryBase, ModifierIdentifier)   // name:contains=Mr
+			queryStruct.Value.Modifiers = condition[1]                 // `contains`
+			info, err = f.Def.MatchSearchParam(resource, condition[0]) // Get information about the query from Dict `name`
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			info , err = f.Def.MatchSearchParam(resource, queryBase) // `name`
+			info, err = f.Def.MatchSearchParam(resource, queryBase) // `name`
 			if err != nil {
 				return nil, err
 			}
