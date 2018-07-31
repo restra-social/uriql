@@ -80,15 +80,19 @@ func (builder *N1QLQueryBuilder) Build(queryInfo *models.QueryInfo) string {
 func (builder *N1QLQueryBuilder) BuildSelectQueryString(queryInfo models.QueryParamInfo) string {
 
 	var query []string
-	for _, field := range queryInfo.DictionaryInfo.SelectStatement {
-		if strings.Contains(field, "[]") { // that is an array so make a select query
+	if len(queryInfo.DictionaryInfo.SelectStatement) > 0 {
+		for _, field := range queryInfo.DictionaryInfo.SelectStatement {
+			if strings.Contains(field, "[]") { // that is an array so make a select query
 
-			lastField := strings.Split(field, ".")
+				lastField := strings.Split(field, ".")
 
-			query = append(query, fmt.Sprintf("ARRAY v FOR v IN %s WHEN v.%s %s '%s' END", strings.TrimPrefix(lastField[0], "[]"), lastField[1], queryInfo.Condition, queryInfo.Value.Value))
-		} else {
-			query = append(query, field)
+				query = append(query, fmt.Sprintf("ARRAY v FOR v IN %s WHEN v.%s %s '%s' END", strings.TrimPrefix(lastField[0], "[]"), lastField[1], queryInfo.Condition, queryInfo.Value.Value))
+			} else {
+				query = append(query, field)
+			}
 		}
+	}else{
+		query = append(query, "*")
 	}
 
 	selectQuery := strings.Join(query, ", ")
