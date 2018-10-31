@@ -25,37 +25,37 @@ func TestN1QLBuild(t *testing.T) {
 
 	var filter models.Filter
 
-	p := "order?store_id=1235&_size=10&_page=2"
-	qp, err := decode.DecodeQueryString(models.RequestInfo{Type: "order", Query: p}, &filter)
+	//p := "order?store_id=1235&_size=10&_page=2"
+	//qp, err := decode.DecodeQueryString(models.RequestInfo{Type: "order", Query: p}, &filter)
+	//if err != nil {
+	//	t.Errorf(err.Error())
+	//}
+	//q := builder.Build(qp)
+	//printResult(t, p, qp, q)
+
+	p := "profiles?name:contains=mr&hobbies=sports&_size=10&_page=2&_sort=hobbies,-name"
+	qp, err := decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	q := builder.Build(qp)
 	printResult(t, p, qp, q)
 
-	p = "profiles?name:contains=mr&hobbies=sports&_size=10&_page=2"
-	qp, err = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "profiles?hobbies=sports&_size=10&_page=1"
-	qp, err = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
-
-	p = "profiles?name:contains=mr&_page=3"
-	qp, err = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	q = builder.Build(qp)
-	printResult(t, p, qp, q)
+	//p = "profiles?hobbies=sports&_size=10&_page=1"
+	//qp, err = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
+	//if err != nil {
+	//	t.Errorf(err.Error())
+	//}
+	//q = builder.Build(qp)
+	//printResult(t, p, qp, q)
+	//
+	//p = "profiles?name:contains=mr&_page=3"
+	//qp, err = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "profile", Query: p}, &filter)
+	//if err != nil {
+	//	t.Errorf(err.Error())
+	//}
+	//q = builder.Build(qp)
+	//printResult(t, p, qp, q)
 
 	/*p = "Patient?name:contains=Mr."
 	qp = decode.DecodeQueryString(models.RequestInfo{UserID: "1234567890", Type: "Patient", Query: p})

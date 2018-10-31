@@ -38,6 +38,7 @@ const (
 	DefaultPaginationParameter     = "%s&_page=1&_size=10"
 	DefaultPaginationSizeParameter = "_size"
 	DefaultPaginationPageParameter = "_page"
+	DefaultOrderByParameter        = "_sort"
 
 	DefaultSearchCondition         = "="
 	DefaultWildcardSearchCondition = "like"
@@ -114,6 +115,7 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *mod
 			filter.Limit = limit
 		}
 
+		// Query Param Separator
 		multiParam := strings.Split(mainQuery, QueryParameterSeparator)
 		for _, param := range multiParam {
 			queryParam, err = f.DecodeQuery(resource, param, request)
@@ -122,6 +124,12 @@ func (f *QueryDecoder) DecodeQueryString(request models.RequestInfo, filter *mod
 				return nil, errors.New(msg)
 			}
 			queryParams = append(queryParams, queryParam)
+		}
+
+		// Sorting Param Separator
+		multiSort := strings.Split(query, DefaultOrderByParameter)
+		for _, param := range multiSort{
+			fmt.Println(param)
 		}
 
 	} else {

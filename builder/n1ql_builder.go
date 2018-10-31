@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DefaultSelectStatement = "r*"
+	DefaultSelectStatement = "r.*"
 	SelectResourceAs       = "r"
 )
 
@@ -92,7 +92,7 @@ func (builder *N1QLQueryBuilder) BuildSelectQueryString(queryInfo models.QueryPa
 			}
 		}
 	}else{
-		query = append(query, "*")
+		query = append(query, DefaultSelectStatement)
 	}
 
 	selectQuery := strings.Join(query, ", ")

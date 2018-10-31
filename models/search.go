@@ -28,5 +28,5 @@ type Sort struct {
 type Filter struct {
 	Page   int // Page Number , 1 or 2 etc
 	Limit  int // Per Page Limit like 10 or 20
-	Offset int // Page Offset value , how many resource to exclude from the result from the top
+	OrderBy map[string]string
 }
